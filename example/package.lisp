@@ -103,8 +103,7 @@ T
     @aboutfun{hand-name}
     @aboutfun{hand-position}
     @aboutfun{hand-grasping}
-    @end{section}
-"))
+    @end{section}"))
 
 (defpackage :blocks-world-goals
   (:use :cl :blocks-world)

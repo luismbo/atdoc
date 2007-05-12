@@ -1,0 +1,26 @@
+
+   atdoc: HTML documentation generation
+
+   Atdoc generates documentation for Common Lisp packages. It extracts
+   documention strings written using a custom markup language and
+   generates HTML pages.
+
+   atdoc was written by David Lichteblau and is available under an
+   X11-style license.
+
+
+Installation
+
+   atdoc needs Closure XML, Split sequence, Slime's swank, and
+   requires an installation of xsltproc.
+
+   ASDF is used for compilation. Register the .asd file, e.g. by
+   symlinking it, then compile atdoc using asdf:operate.
+
+$ ln -sf `pwd`/atdoc.asd /path/to/your/registry/
+* (asdf:operate 'asdf:load-op :atdoc)
+
+
+Documentation
+
+   Please refer to the HTML documentation in doc/.
