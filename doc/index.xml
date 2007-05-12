@@ -1,0 +1,55 @@
+<page title="atdoc: HTML documentation generation">
+  <p>
+    Atdoc generates documentation
+    for <a href="http://en.wikipedia.org/wiki/Common_Lisp">Common
+      Lisp</a> packages.  It
+    extracts <a
+    href="http://www.lispworks.com/documentation/HyperSpec/Body/f_docume.htm">documention
+    strings</a>
+    written using a custom markup language and generates HTML pages.
+  </p>
+  <p>
+    atdoc was written
+    by <a href="mailto:david@lichteblau.com">David
+      Lichteblau</a> and is available under an X11-style license.
+  </p>
+
+  <h3>Download and Installation</h3>
+
+  <p>
+    Download an atdoc
+    <a href="http://www.lichteblau.com/atdoc/download/">tarball</a>
+    or get it from git: <tt>http://www.lichteblau.com/git/atdoc.git</tt>
+  </p>
+  <p>
+    atdoc needs
+    <a href="http://common-lisp.net/project/cxml">Closure XML</a>, 
+    <a href="http://www.cliki.net/SPLIT-SEQUENCE">Split sequence</a>,
+    <a href="http://www.cliki.net/SLIME">Slime's swank</a>,
+    and requires an installation
+    of <a href="http://xmlsoft.org/XSLT/xsltproc2.html">xsltproc</a>.
+  </p>
+  <p>
+    <a href="http://www.cliki.net/asdf">ASDF</a> is used for
+    compilation.  Register the .asd file, e.g. by symlinking it,
+    then compile atdoc using <tt>asdf:operate</tt>.
+  </p>
+  <pre>$ ln -sf `pwd`/atdoc.asd /path/to/your/registry/
+* (asdf:operate 'asdf:load-op :atdoc)</pre>
+
+  <h3>Invocation</h3>
+  <pre class="code">(cxml:parse-file "example.xml"
+                 <blau>(cxml-rng:make-validator
+                  (cxml-rng:parse-schema #p"example.rng"))</blau>)</pre>
+  <p>
+    In order to validate while also processing events with
+    another handler, use a broadcast handler.  For example, to
+    parse XML into DOM while also validating it, broadcast to
+    the validator and DOM builder (in that order):
+  </p>
+
+  <h3>Sample Documentation</h3>
+  <p>
+    <a href="example/index.html">API documentation</a> for the Blocks World.
+  </p>
+</page>
