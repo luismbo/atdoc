@@ -166,7 +166,7 @@ be called by the user.
     documentation string as the first step of processing it.  In this
     case, @arg, @return, and @see are the tags that will be removed.
     All @arg tags will be collected into a section about the function's
-    argument, all @see tags will be collected together will all @fun and
+    arguments, all @see tags will be collected together will all @fun and
     @class references into a "See also" section.
   </p>
   <p>
@@ -292,7 +292,8 @@ the computed result
     Both forms take an optional argument, written with brackets:
     <pre>@a[http://www.cliki.net]{Cliki}</pre>
     (gets translated into
-    <tt>&lt;a href="http://www.cliki.net">Cliki&lt;/a></tt>)
+    <tt>&lt;a a="http://www.cliki.net">Cliki&lt;/a></tt>, until the XSLT
+    stylesheets rename a into href)
     <pre>@begin[Title]{section}
 body
 @end{section}</pre>
@@ -304,8 +305,7 @@ body
     <pre>closing braces need to be escaped: {n,m@}</pre>
   </p>
   <p>
-    Finally, multiple line breaks are translated into separate
-    paragraphs:
+    Multiple line breaks delimit paragraphs:
     <pre>First paragraph.
 
 Second paragraph.</pre>
