@@ -18,8 +18,10 @@
 
   <p>
     Download an atdoc
-    <a href="http://www.lichteblau.com/atdoc/download/">tarball</a>
+    <a href="http://www.lichteblau.com/atdoc/download/">tarball</a>.
+<!--
     or get it from git: <tt>http://www.lichteblau.com/git/atdoc.git</tt>
+-->
   </p>
   <p>
     atdoc needs
