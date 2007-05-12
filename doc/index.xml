@@ -37,19 +37,278 @@
   <pre>$ ln -sf `pwd`/atdoc.asd /path/to/your/registry/
 * (asdf:operate 'asdf:load-op :atdoc)</pre>
 
-  <h3>Invocation</h3>
-  <pre class="code">(cxml:parse-file "example.xml"
-                 <blau>(cxml-rng:make-validator
-                  (cxml-rng:parse-schema #p"example.rng"))</blau>)</pre>
-  <p>
-    In order to validate while also processing events with
-    another handler, use a broadcast handler.  For example, to
-    parse XML into DOM while also validating it, broadcast to
-    the validator and DOM builder (in that order):
-  </p>
-
   <h3>Sample Documentation</h3>
   <p>
-    <a href="example/index.html">API documentation</a> for the Blocks World.
+    As an example, I have chosen code from the
+    book <a
+    href="http://www.amazon.com/Lisp-3rd-Patrick-Winston/dp/0201083191">
+      Lisp (3rd edition)
+    </a>
+    by Winston and Horn.  You can find the code with an ASDF definition
+     in the <tt>example/</tt> subdirectory of the atdoc sources so that
+     you can easily compile it yourself.  The code included is the
+     Blocks World, from chapters 21 (<i>"The Blocks World with Classes
+     and Methods"</i>) and 22 (<i>"Answering Questions about
+     Goals"</i>).  Note that the source code from the book has been
+     taken from the publically available <tt>lisp3</tt> tarball and is
+     covered by its own license, different from the license of atdoc.
   </p>
+  <p>
+    See the atdoc-generated
+    <a href="../example/index.html">documentation for the Blocks World</a>.
+  </p>
+  <p>It was generated using this atdoc invocation:</p>
+  <pre>(atdoc:generate-documentation '(:blocks-world :blocks-world-goals)
+			      "/home/david/src/lisp/atdoc/example/"
+			      :index-title "Blocks World API reference"
+			      :heading "The Blocks World"
+			      :css "orange-sans.css")</pre>
+
+  <h3>Usage</h3>
+  <p>
+    atdoc exports only one function, <tt>atdoc:generate-documentation</tt>.
+    It accept the following arguments (see above for an example):
+  </p>
+  <p>
+    <ul>
+      <li>
+	<b>packages</b> (required).  List of package designators.
+	Focumentation will be generated for these packages.
+      </li>
+      <li>
+	<b>directory</b> (required).  A pathname specifying a directory. 
+	Multiple files will be created in this directory, and
+	overwritten if they already exist.
+      </li>
+      <li>
+	<b>index-title</b> (keyword argument).  This string will be
+	used as the &lt;title> of the main page, <tt>index.html</tt>.
+	(Other pages will be named according to the object they are
+	documenting.)
+      </li>
+      <li>
+	<b>heading</b> (keyword argument).  This string will be
+	used as a visible title on top of every page.
+      </li>
+      <li>
+	<b>css</b> (keyword argument).  A pathname or string pointing
+	to a cascading stylesheet (CSS) file.  This file will be copied
+	to the target directory under the name <tt>index.css</tt>.
+	If this argument is a string and does not start with a dot, it
+	will be taken as namestring relative to the <tt>atdoc/css</tt>
+	directory.
+      </li>
+      <li>
+	<b>logo</b> (keyword argument).  This optional URI string will
+	should be a relative reference to an image in the target
+	directory and will be inserted as an image element at the upper
+	left corner of every page.
+      </li>
+    </ul>
+  </p>
+  <p>
+    <b>Included Stylesheets</b>. Several CSS files are included as an
+    example, including <tt>blue-serif.css</tt>,
+    <tt>orange-sans.css</tt>, and <tt>boxy.css</tt>.
+  </p>
+  <p>IANAA (I am not an artist) and would welcome submission of better
+  stylesheets.</p>
+
+  <p>
+    <b>Generated files</b>. atdoc will create the following files in the
+    target directory:
+    <ul>
+      <li>
+	<b>index.html</b>.  This is the main page, which shows a list of
+	all packages and a symbol index for all their exported symbols.
+      </li>
+      <li>
+	<b>pages/*.html</b>.  Every package, class, function, and
+	variable is documented on its own page in this subdirectory.
+      </li>
+      <li>
+	<b>index.css</b>.  The is a copy of the file specified by
+	the <tt>css</tt> keyword argument.
+      </li>
+      <li>
+	<b>.atdoc.*</b>.  Temporary files (can be deleted safely).
+      </li>
+    </ul>
+  </p>
+
+  <h3>Writing a documentation string</h3>
+  <p>
+    Here is an example of what the documentation
+    of <a
+    href="http://www.lispworks.com/documentation/HyperSpec/Body/f_pr_obj.htm">print-object</a>
+    could look like using atdoc:
+  </p>
+  <pre>@arg[object]{an object}
+@arg[stream]{a @class{stream}}
+@return{@code{object}}
+
+@short{The generic function @fun{print-object} writes the printed
+representation of @code{object} to @code{stream}.}
+
+The function print-object is called by the Lisp printer; it should not
+be called by the user.
+
+(...)
+
+@see{pprint-fill}
+@see{pprint-logical-block}
+(...)</pre>
+  <p>
+    Note that parts of the documentation strings are
+    just <em>documentation text</em>, which is will be included in a
+    section "Details" of the page.  Other parts, however, are not part
+    of the actual text, and will be <em>extracted</em> from the
+    documentation string as the first step of processing it.  In this
+    case, @arg, @return, and @see are the tags that will be removed.
+    All @arg tags will be collected into a section about the function's
+    argument, all @see tags will be collected together will all @fun and
+    @class references into a "See also" section.
+  </p>
+  <p>
+    Tags for use only in the docstring of a package itself:
+    <ul>
+      <li>
+	<b>@section[title]</b>: Generates a sub-heading
+	called <em>title</em>.  A table of contents will be generated at
+	the top of the package pages listing the sections.
+      </li>
+      <li>
+	<b>@aboutfun{name}</b>: Insert the lambda list of
+	function <em>name</em> and its short description (the contents
+	of @short in its docstring).
+      </li>
+      <li>
+	<b>@aboutclass{name}</b>: Insert the name of class <em>name</em>
+	and its short description (the contents of @short in its docstring).
+      </li>
+    </ul>
+  </p>
+  <p>
+    Tags that will be extracted into their own sections:
+    <ul>
+      <li>
+	<b>@arg[name]{description}</b>: Will be moved into the
+	"Arguments" section.
+      </li>
+      <li>
+	<b>@return{description}</b>: Will be moved into the
+	"Return Value" section.
+      </li>
+      <li>
+	<b>@see{name}</b>: Link to the function named <em>name</em>.
+	Syntactically like @fun, this tag will be moved into the "See
+	also" section.
+      </li>
+      <li>
+	<b>@see-slot{name}</b>: Similar to @see, this tag specifies a
+	slot reader function for the class it is used in, and will be
+	moved into a "Slot Access Functions" sections.  In addition, a
+	section "Inherited Slot Access Functions" will be shown for
+	subclasses.
+      </li>
+      <li>
+	<b>@see-constructor{name}</b>: Similar to @see, this tag specifies a
+	function creating instances of current class, and will be
+	moved into a "Returned By" section.
+      </li>
+    </ul>
+  </p>
+  <p>
+    Tags for use in the documentation text:
+    <ul>
+      <li>
+	<b>@short{text}</b>: Copies text into the output normally, but
+	will also extract it for use with @aboutfun and @aboutclass.
+      </li>
+      <li>
+	<b>@code</b>: In-line lisp code, will be formatted using a
+	fixed-width font.
+      </li>
+      <li>
+	<b>@a[href]</b>: Hyperlink.  This tag accepts an argument, the URL to
+	be used as the <tt>href</tt> attribute.
+      </li>
+      <li>
+	<b>@itemize</b>, <b>@item</b>: Like &lt;ul> and &lt;li>;
+      </li>
+      <li>
+	<b>@fun{name}</b>: Link to the function named <em>name</em>,
+	read as a symbol into the current package (qualify with a
+	package name to reference other packages included in the same
+	documentation).
+      </li>
+      <li>
+	<b>@class{name}</b>: Link to the class named <em>name</em>.
+	Works like @fun.
+      </li>
+      <li>
+	<b>@variable{name}</b>: Link to the special variable
+	named <em>name</em>. Works like @fun.
+      </li>
+    </ul>
+  </p>
+  <p>
+    Tags that are passed through to HTML:
+    <ul>
+      <li>
+	<b>@pre</b>: Preformatted section, e.g. for source code listings.
+      </li>
+      <li>
+	<b>@b</b>: Bold font.
+      </li>
+      <li>
+	<b>@em</b>: Italic font.
+      </li>
+    </ul>
+  </p>
+
+  <h3>The Atsign syntax</h3>
+  <p>
+    Atdoc looks for markup tags start with an at-sign, in either a long
+    or a short form.
+  </p>
+  <p>
+    The short form looks like this: <pre>@return{the computed result}</pre>
+  </p>
+  <p>
+    The long form can be convenient for multiple lines of text:
+    <pre>@begin{return}
+the computed result
+@end{return}</pre>
+  </p>
+  <p>
+    Except for the additional whitespace due to line breaks in the
+    second example, the two forms are completely interchangeable.
+    Behind the scenes, both produce an XML
+    element with tag name <i>result</i>, <tt>&lt;result>the computed
+    result&lt;/result></tt>
+  </p>
+  <p>
+    Both forms take an optional argument, written with brackets:
+    <pre>@a[http://www.cliki.net]{Cliki}</pre>
+    (gets translated into
+    <tt>&lt;a href="http://www.cliki.net">Cliki&lt;/a></tt>)
+    <pre>@begin[Title]{section}
+body
+@end{section}</pre>
+    (gets translated into
+    <tt>&lt;section section="Title">body&lt;/section></tt>)
+  </p>
+  <p>
+    The atsign also escapes special characters:
+    <pre>closing braces need to be escaped: {n,m@}</pre>
+  </p>
+  <p>
+    Finally, multiple line breaks are translated into separate
+    paragraphs:
+    <pre>First paragraph.
+
+Second paragraph.</pre>
+  </p>
+
 </page>

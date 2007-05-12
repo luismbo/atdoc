@@ -76,8 +76,8 @@ h1,h2,h3 {
   font-family: verdana, arial;
   font-size: 12pt;
 }
-
-.code {
+ 
+pre {
   background-color: #eeeeee;
   border: solid 1px #d0d0d0;
   padding: 1em;
