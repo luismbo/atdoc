@@ -125,7 +125,8 @@
   (cxml:with-element "package"
     (cxml:attribute "name" (string-downcase (package-name package)))
     (cxml:attribute "id" (string-downcase (package-name package)))
-    (emit-docstring package (documentation package t))
+    (emit-docstring package (or (documentation package t)
+				"no documentation string found"))
     (cxml:with-element "symbols"
       (do-external-symbols (sym package)
 	(when (boundp sym)

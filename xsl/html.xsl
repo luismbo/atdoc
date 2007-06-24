@@ -270,7 +270,7 @@
 
     <row>
       <xsl:if test="$packagep">
-	<cell align="right">
+	<cell align="right" nowrap="nowrap">
 	  <span class="nonlink">
 	    <tt>
 	      <span style="color: #777777">
