@@ -93,12 +93,14 @@
 	  pathname="pages/{@id}.html"
 	  title="Package {@name}">
       <padded>
-	<p class="noindent">
-	  Up:
-	  <a href="../index.html">
-	    <xsl:value-of select="/documentation/@index-title"/>
-	  </a>
-	</p>
+	<xsl:if test="count(../package) > 1">
+	  <p class="noindent">
+	    Up:
+	    <a href="../index.html">
+	      <xsl:value-of select="/documentation/@index-title"/>
+	    </a>
+	  </p>
+	</xsl:if>
 	<h1>
 	  Package
 	  <xsl:value-of select="@name"/>
@@ -222,9 +224,18 @@
 	  Macro
 	  <xsl:value-of select="@name"/>
 	</h2>
-	<xsl:apply-templates select="lambda-list"/>
-	<xsl:call-template name="main"/>
       </padded>
+      <macro:maybe-columns test="see-also">
+	<padded>
+          <h3>Lambda List</h3>
+	  <div class="indent">
+	    <xsl:apply-templates select="lambda-list"/>
+	  </div>
+	  <xsl:apply-templates select="arguments"/>
+	  <xsl:apply-templates select="return"/>
+	  <xsl:call-template name="main-left"/>
+	</padded>
+      </macro:maybe-columns>
     </page>
   </xsl:template>
 
@@ -258,7 +269,7 @@
     <xsl:param name="packagep"/>
     <simple-table>
       <xsl:apply-templates mode="symbol-index">
-	<xsl:sort select="@id" data-type="text" order="ascending"/>
+	<xsl:sort select="@name" data-type="text" order="ascending"/>
 	<xsl:with-param name="packagep" select="$packagep"/>
       </xsl:apply-templates>
     </simple-table>
@@ -459,10 +470,12 @@
     <xsl:text>)</xsl:text>
   </xsl:template>
 
-  <xsl:template mode="about-arguments" match="lambda-list">
+  <xsl:template name="about-arguments">
+    <xsl:param name="label"/>
     <div class="def">
       <a href="{../@id}.html">
-	Function
+	<xsl:value-of select="$label"/>
+	<xsl:text> </xsl:text>
 	<xsl:value-of select="../@name"/>
 	<xsl:text> (</xsl:text>
 	<xsl:for-each select="elt">
@@ -606,9 +619,11 @@
 
   <xsl:template match="aboutfun">
     <xsl:variable name="fun" select="text()"/>
-    <xsl:apply-templates
-       mode="about-arguments"
-       select="//function-definition[@name=$fun]/lambda-list"/>
+    <xsl:for-each select="//function-definition[@name=$fun]/lambda-list">
+      <xsl:call-template name="about-arguments">
+	<xsl:with-param name="label" select="'Function'"/>
+      </xsl:call-template>
+    </xsl:for-each>
     <div style="margin-left: 3em">
       <xsl:choose>
 	<xsl:when
@@ -622,6 +637,32 @@
 	<xsl:otherwise>
 	  <xsl:apply-templates
 	     select="//function-definition[@name=$fun]/documentation-string"/>
+	</xsl:otherwise>
+      </xsl:choose>
+    </div>
+    <br/>
+  </xsl:template>
+
+  <xsl:template match="aboutmacro">
+    <xsl:variable name="fun" select="text()"/>
+    <xsl:for-each select="//macro-definition[@name=$fun]/lambda-list">
+      <xsl:call-template name="about-arguments">
+	<xsl:with-param name="label" select="'Macro'"/>
+      </xsl:call-template>
+    </xsl:for-each>
+    <div style="margin-left: 3em">
+      <xsl:choose>
+	<xsl:when
+	   test="//macro-definition[@name=$fun]/documentation-string//short">
+	  <xsl:for-each select="//macro-definition[@name=$fun]">
+	    <xsl:apply-templates select="documentation-string//short"/>
+	    <xsl:text> </xsl:text>
+	    <a href="{@id}.html#details">...</a>
+	  </xsl:for-each>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:apply-templates
+	     select="//macro-definition[@name=$fun]/documentation-string"/>
 	</xsl:otherwise>
       </xsl:choose>
     </div>

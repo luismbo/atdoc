@@ -75,7 +75,9 @@
     (setf css "default.css"))
   (setf packages (mapcar #'find-package packages))
   (with-open-file (s (merge-pathnames ".atdoc.xml" directory)
+		     :element-type '(unsigned-byte 8)
 		     :direction :output
+		     :if-does-not-exist :create
 		     :if-exists :rename-and-delete)
     (cxml:with-xml-output (cxml:make-octet-stream-sink s)
       (cxml:with-element "documentation"
@@ -94,13 +96,14 @@
       (xsltproc ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
       (xsltproc "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html")))))
 
-(defun munge-name (name)
-  (format nil "~(~A~)__~(~A~)"
+(defun munge-name (name kind)
+  (format nil "~(~A~)__~A__~(~A~)"
 	  (package-name (symbol-package name))
+	  kind
 	  (substitute #\_ #\* (symbol-name name))))
 
-(defun name (name)
-  (cxml:attribute "id" (munge-name name))
+(defun name (name kind)
+  (cxml:attribute "id" (munge-name name kind))
   (unexported-name name))
 
 (defun unexported-name (name)
@@ -115,10 +118,10 @@
   (and (find (symbol-package symbol) other-packages)
        (not (eq (symbol-status symbol) :internal))))
 
-(defun random-name (name other-packages)
+(defun random-name (name other-packages kind)
   (cxml:attribute "status" (symbol-name (symbol-status name)))
   (if (good-symbol-p name other-packages)
-      (name name)
+      (name name kind)
       (unexported-name name)))
 
 (defun emit-package (package other-packages)
@@ -140,12 +143,12 @@
 
 (defun emit-variable (name)
   (cxml:with-element "variable-definition"
-    (name name)
+    (name name "variable")
     (emit-docstring name (documentation name 'variable))))
 
 (defun emit-function (name)
   (cxml:with-element "function-definition"
-    (name name)
+    (name name "fun")
     (cxml:with-element "lambda-list"
       (dolist (arg (function-arglist (symbol-function name)))
 	(cxml:with-element "elt"
@@ -157,7 +160,7 @@
 
 (defun emit-macro (name)
   (cxml:with-element "macro-definition"
-    (name name)
+    (name name "macro")
     (cxml:with-element "lambda-list"
       (dolist (arg (function-arglist (macro-function name)))
 	(cxml:with-element "elt"
@@ -169,18 +172,18 @@
 
 (defun emit-class (class other-packages)
   (cxml:with-element "class-definition"
-    (name (class-name class))
+    (name (class-name class) "class")
     (sb-pcl:finalize-inheritance class)
     (cxml:with-element "cpl"
       (dolist (super (cdr (sb-pcl:class-precedence-list class)))
 	(cxml:with-element "superclass"
-	  (random-name (class-name super) other-packages))))
+	  (random-name (class-name super) other-packages "class"))))
     (cxml:with-element "subclasses"
       (labels ((recurse (c)
 		 (dolist (sub (sb-pcl:class-direct-subclasses c))
 		   (if (good-symbol-p (class-name sub) other-packages)
 		       (cxml:with-element "subclass"
-			 (random-name (class-name sub) other-packages))
+			 (random-name (class-name sub) other-packages "class"))
 		       (recurse sub)))))
 	(recurse class)))
     (emit-docstring (class-name class) (documentation class t))))
@@ -287,6 +290,7 @@
     ((docstring-package :initarg :docstring-package
 			:accessor docstring-package)
      (current-name :initform nil :accessor current-name)
+     (current-kind :accessor current-kind)
      (current-attributes :accessor current-attributes)
      (current-text :accessor current-text)))
 
@@ -300,6 +304,11 @@
 	 (equal qname "see-slot")
 	 (equal qname "see-constructor"))
       (setf (current-name handler) qname)
+      (setf (current-kind handler)
+	    (case (intern qname :atdoc)
+	      ((|fun| |class| |variable|) qname)
+	      ((|see| |see-slot|) "fun")
+	      (|see-constructor| "fun")))
       (setf (current-attributes handler) attrs)
       (setf (current-text handler) ""))
     (t
@@ -320,7 +329,8 @@
 	     (munged-name
 	      (munge-name
 	       (let ((*package* (docstring-package handler)))
-		 (read-from-string text)))))
+		 (read-from-string text))
+	       (current-kind handler))))
 	(push (sax:make-attribute :qname "id" :value munged-name) attrs)
 	(sax:start-element next nil name name attrs)
 	(sax:characters next text)
