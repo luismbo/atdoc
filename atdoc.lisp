@@ -1,6 +1,6 @@
 ;;; -*- show-trailing-whitespace: t; indent-tabs: nil -*-
 
-;;; Copyright (c) 2006,2007 David Lichteblau. All rights reserved.
+;;; Copyright (c) 2006,2007,2008 David Lichteblau. All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions
@@ -39,18 +39,31 @@
 	(setf file (merge-pathnames file base))))
     (namestring file)))
 
-(defun xsltproc (stylesheet input output)
-  (let* ((asdf::*verbose-out* (make-string-output-stream))
-	 (code (asdf:run-shell-command
-		"cd ~S && xsltproc ~S ~S >~S"
-		(magic-namestring *default-pathname-defaults*)
-		(magic-namestring stylesheet)
-		(magic-namestring input)
-		(magic-namestring output))))
-    (unless (zerop code)
-      (error "running xsltproc failed with code ~A [~%~A~%]"
-	     code
-	     (get-output-stream-string asdf::*verbose-out*)))))
+(defparameter *apply-stylesheet*
+  ;; 'apply-stylesheet/xsltproc
+  'apply-stylesheet/xuriella)
+
+(defun apply-stylesheet/xuriella (stylesheet input output)
+  (xuriella:apply-stylesheet (pathname (magic-namestring stylesheet))
+			     (pathname (magic-namestring input))
+			     :output (pathname (magic-namestring output))))
+
+(defun apply-stylesheet/xsltproc (stylesheet input output)
+  (ecase *stylesheet-processor*
+    (let* ((asdf::*verbose-out* (make-string-output-stream))
+	   (code (asdf:run-shell-command
+		  "cd ~S && xsltproc ~S ~S >~S"
+		  (magic-namestring *default-pathname-defaults*)
+		  (magic-namestring stylesheet)
+		  (magic-namestring input)
+		  (magic-namestring output))))
+      (unless (zerop code)
+	(error "running xsltproc failed with code ~A [~%~A~%]"
+	       code
+	       (get-output-stream-string asdf::*verbose-out*))))))
+
+(defun apply-stylesheet (stylesheet input output)
+  (funcall *apply-stylesheet* stylesheet input output))
 
 (defun copy-file (a b &key (if-exists :error))
   (with-open-file (in a :element-type '(unsigned-byte 8))
@@ -69,7 +82,7 @@
                              (heading "No Heading")
                              css
                              (logo nil)
-                             (run-xsltproc t))
+                             (apply-stylesheets-p t))
   (unless css
     (warn "no CSS stylesheet specified, falling back to default.css")
     (setf css "default.css"))
@@ -87,14 +100,14 @@
 	(cxml:attribute "heading" heading)
 	(dolist (package packages)
 	  (emit-package package packages)))))
-  (when run-xsltproc
+  (when apply-stylesheets-p
     (let ((*default-pathname-defaults* (merge-pathnames directory)))
       (copy-file (magic-namestring css) "index.css"
 		 :if-exists :rename-and-delete)
-      (xsltproc "macros.xsl" "html.xsl" ".atdoc.html.xsl.out")
-      (xsltproc "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-      (xsltproc ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
-      (xsltproc "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html")))))
+      (apply-stylesheet "macros.xsl" "html.xsl" ".atdoc.html.xsl.out")
+      (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
+      (apply-stylesheet ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
+      (apply-stylesheet "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html")))))
 
 (defun munge-name (name kind)
   (format nil "~(~A~)__~A__~(~A~)"
