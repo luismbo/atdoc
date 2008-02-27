@@ -43,24 +43,26 @@
   ;; 'apply-stylesheet/xsltproc
   'apply-stylesheet/xuriella)
 
+#+(or)
+(setf *apply-stylesheet* 'apply-stylesheet/xsltproc)
+
 (defun apply-stylesheet/xuriella (stylesheet input output)
   (xuriella:apply-stylesheet (pathname (magic-namestring stylesheet))
 			     (pathname (magic-namestring input))
 			     :output (pathname (magic-namestring output))))
 
 (defun apply-stylesheet/xsltproc (stylesheet input output)
-  (ecase *stylesheet-processor*
-    (let* ((asdf::*verbose-out* (make-string-output-stream))
-	   (code (asdf:run-shell-command
-		  "cd ~S && xsltproc ~S ~S >~S"
-		  (magic-namestring *default-pathname-defaults*)
-		  (magic-namestring stylesheet)
-		  (magic-namestring input)
-		  (magic-namestring output))))
-      (unless (zerop code)
-	(error "running xsltproc failed with code ~A [~%~A~%]"
-	       code
-	       (get-output-stream-string asdf::*verbose-out*))))))
+  (let* ((asdf::*verbose-out* (make-string-output-stream))
+	 (code (asdf:run-shell-command
+		"cd ~S && xsltproc ~S ~S >~S"
+		(magic-namestring *default-pathname-defaults*)
+		(magic-namestring stylesheet)
+		(magic-namestring input)
+		(magic-namestring output))))
+    (unless (zerop code)
+      (error "running xsltproc failed with code ~A [~%~A~%]"
+	     code
+	     (get-output-stream-string asdf::*verbose-out*)))))
 
 (defun apply-stylesheet (stylesheet input output)
   (funcall *apply-stylesheet* stylesheet input output))
