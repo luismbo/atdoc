@@ -17,19 +17,18 @@
   <h3>Download and Installation</h3>
 
   <p>
-    Download an atdoc
-    <a href="http://www.lichteblau.com/atdoc/download/">tarball</a>.
-<!--
-    or get it from git: <tt>http://www.lichteblau.com/git/atdoc.git</tt>
--->
+    Download an
+    <a href="http://www.lichteblau.com/atdoc/download/">atdoc
+    tarball</a>, or get it from
+    git: <tt>http://www.lichteblau.com/git/atdoc.git</tt>
   </p>
   <p>
     atdoc needs
     <a href="http://common-lisp.net/project/cxml">Closure XML</a>, 
     <a href="http://www.cliki.net/SPLIT-SEQUENCE">Split sequence</a>,
     <a href="http://www.cliki.net/SLIME">Slime's swank</a>,
-    and requires an installation
-    of <a href="http://xmlsoft.org/XSLT/xsltproc2.html">xsltproc</a>.
+    <a href="http://repo.or.cz/w/xuriella.git">Xuriella XSLT</a>,
+    and their dependencies.
   </p>
   <p>
     <a href="http://www.cliki.net/asdf">ASDF</a> is used for
@@ -313,4 +312,17 @@ body
 Second paragraph.</pre>
   </p>
 
+  <h3>Recent changes</h3>
+  <p><b>2008-03-dd</b></p>
+  <ul>
+    <li>
+      Use Xuriella instead of xsltproc.
+    </li>
+  </ul>
+  <p><b>2007-05-13</b></p>
+  <ul>
+    <li>
+      Initial public release. 
+    </li>
+  </ul>
 </page>
