@@ -205,7 +205,8 @@
   (cxml:with-element "class-definition"
     (name (class-name class) "class")
     #+sbcl (sb-pcl:finalize-inheritance class)
-    #+allegro (aclmop:finalize-inheritance class)
+    #+allegro (unless (typep class 'structure-class)
+		(aclmop:finalize-inheritance class))
     (cxml:with-element "cpl"
       (dolist (super (cdr #+sbcl (sb-pcl:class-precedence-list class)
 			  #+allegro (aclmop:class-precedence-list class)))
