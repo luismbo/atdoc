@@ -51,6 +51,7 @@
 			     (pathname (magic-namestring input))
 			     :output (pathname (magic-namestring output))))
 
+#+sbcl
 (defun apply-stylesheet/xsltproc (stylesheet input output)
   (let* ((asdf::*verbose-out* (make-string-output-stream))
 	 (code (asdf:run-shell-command
@@ -63,6 +64,21 @@
       (error "running xsltproc failed with code ~A [~%~A~%]"
 	     code
 	     (get-output-stream-string asdf::*verbose-out*)))))
+
+#+allegro
+(defun apply-stylesheet/xsltproc (stylesheet input output)
+  (multiple-value-bind (stdout stderr exitcode)
+      (excl.osi:command-output
+       (format nil "xsltproc ~S ~S >~S"
+	       (magic-namestring stylesheet)
+	       (magic-namestring input)
+	       (magic-namestring output))
+       :directory (magic-namestring *default-pathname-defaults*)
+       :whole T)
+    (declare (ignore stdout))
+    (unless (zerop exitcode)
+      (error "running xsltproc failed with code ~A [~%~A~%]"
+	     exitcode stderr))))
 
 (defun apply-stylesheet (stylesheet input output)
   (funcall *apply-stylesheet* stylesheet input output))
@@ -188,14 +204,17 @@
 (defun emit-class (class other-packages)
   (cxml:with-element "class-definition"
     (name (class-name class) "class")
-    (sb-pcl:finalize-inheritance class)
+    #+sbcl (sb-pcl:finalize-inheritance class)
+    #+allegro (aclmop:finalize-inheritance class)
     (cxml:with-element "cpl"
-      (dolist (super (cdr (sb-pcl:class-precedence-list class)))
+      (dolist (super (cdr #+sbcl (sb-pcl:class-precedence-list class)
+			  #+allegro (aclmop:class-precedence-list class)))
 	(cxml:with-element "superclass"
 	  (random-name (class-name super) other-packages "class"))))
     (cxml:with-element "subclasses"
       (labels ((recurse (c)
-		 (dolist (sub (sb-pcl:class-direct-subclasses c))
+		 (dolist (sub #+sbcl (sb-pcl:class-direct-subclasses c)
+			      #+allegro (aclmop:class-direct-subclasses c))
 		   (if (good-symbol-p (class-name sub) other-packages)
 		       (cxml:with-element "subclass"
 			 (random-name (class-name sub) other-packages "class"))
