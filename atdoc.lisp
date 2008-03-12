@@ -157,21 +157,33 @@
       (unexported-name name)))
 
 (defun emit-package (package other-packages)
-  (cxml:with-element "package"
-    (cxml:attribute "name" (string-downcase (package-name package)))
-    (cxml:attribute "id" (string-downcase (package-name package)))
-    (emit-docstring package (or (documentation package t)
-				"no documentation string found"))
-    (cxml:with-element "symbols"
-      (do-external-symbols (sym package)
-	(when (boundp sym)
-	  (emit-variable sym))
-	(when (fboundp sym)
-	  (if (macro-function sym)
-	      (emit-macro sym)
-	      (emit-function sym)))
-	(when (find-class sym nil)
-	  (emit-class (find-class sym) other-packages))))))
+  (flet ((handle-symbol (sym)
+	   (when (boundp sym)
+	     (emit-variable sym))
+	   (when (fboundp sym)
+	     (if (macro-function sym)
+		 (emit-macro sym)
+		 (emit-function sym)))
+	   (when (find-class sym nil)
+	     (emit-class (find-class sym) other-packages)))
+	 (is-internal? (sym pkg)
+	   "Check whether SYM is internal in PKG."
+	   (multiple-value-bind (symbol status)
+	       (intern (symbol-name sym) pkg)
+	     (declare (ignore symbol))
+	     (eq status :internal))))
+    (cxml:with-element "package"
+      (cxml:attribute "name" (string-downcase (package-name package)))
+      (cxml:attribute "id" (string-downcase (package-name package)))
+      (emit-docstring package (or (documentation package t)
+				  "no documentation string found"))
+      (cxml:with-element "external-symbols"
+	(do-external-symbols (sym package)
+	  (handle-symbol sym)))
+      (cxml:with-element "internal-symbols"
+	(do-symbols (sym package)
+	  (when (is-internal? sym package)
+	    (handle-symbol sym)))))))
 
 (defun emit-variable (name)
   (cxml:with-element "variable-definition"

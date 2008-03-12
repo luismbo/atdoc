@@ -21,7 +21,8 @@
       <xsl:call-template name="configuration-attributes"/>
       <xsl:apply-templates select="documentation"/>
       <xsl:apply-templates select="documentation/package"/>
-      <xsl:apply-templates select="documentation/package/symbols/*"/>
+      <xsl:apply-templates select="documentation/package/external-symbols/*"/>
+      <xsl:apply-templates select="documentation/package/internal-symbols/*"/>	
     </pages>
   </xsl:template>
 
@@ -75,9 +76,9 @@
 	  </padded>
 	</column>
 	<column>
-	  <h3><a name="index"></a>Symbol Index</h3>
+	  <h3><a name="index"></a>Exported Symbol Index</h3>
 	  <simple-table>
-	    <xsl:apply-templates select="package/symbols/*"
+	    <xsl:apply-templates select="package/external-symbols/*"
 				 mode="symbol-index">
 	      <xsl:sort select="@name" data-type="text" order="ascending"/>
 	      <xsl:with-param name="packagep" select="'pages/'"/>
@@ -126,8 +127,8 @@
 	  </padded>
 	</column>
 	<column>
-	  <h3><a name="index"></a>Symbol Index</h3>
-	  <xsl:apply-templates select="symbols" mode="symbol-index"/>
+	  <h3><a name="index"></a>Exported Symbol Index</h3>
+	  <xsl:apply-templates select="external-symbols" mode="symbol-index"/>
 	</column>
       </columns>
     </page>
@@ -265,7 +266,7 @@
     -->
   <xsl:template match="*" mode="symbol-index"/>
 
-  <xsl:template match="symbols" mode="symbol-index">
+  <xsl:template match="external-symbols" mode="symbol-index">
     <xsl:param name="packagep"/>
     <simple-table>
       <xsl:apply-templates mode="symbol-index">
