@@ -331,6 +331,7 @@
      (current-text :accessor current-text)))
 
 (defmethod sax:start-element ((handler docstring-parser) uri lname qname attrs)
+  (declare (ignore lname uri))
   (cond
     ((or (equal qname "fun")
 	 (equal qname "class")
@@ -357,6 +358,7 @@
       (call-next-method)))
 
 (defmethod sax:end-element ((handler docstring-parser) uri lname qname)
+  (declare (ignore lname uri))
   (let ((name (current-name handler)))
     (when (equal qname name)
       (let* ((next (cxml:proxy-chained-handler handler))
