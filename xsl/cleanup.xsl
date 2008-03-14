@@ -1,4 +1,4 @@
-<!--
+<!--  hey, emacs, treat this file as -*- sgml -*-, please
     The first stylesheet to be used, this file cleans up the structure
     of the Lisp-generated XML file by extracting elements from all
     docstrings into their parent elements, so that only the textual
@@ -83,6 +83,7 @@
 
   <xsl:template match="class-definition
 		       |function-definition
+                       |type-definition
 		       |variable-definition">
     <xsl:if test="not(.//unexport)">
       <xsl:copy>

@@ -165,7 +165,9 @@
 		 (emit-macro sym)
 		 (emit-function sym)))
 	   (when (find-class sym nil)
-	     (emit-class (find-class sym) other-packages)))
+	     (emit-class (find-class sym) other-packages))
+	   (when (documentation sym 'type) ;; is there a better CLTL-way to check whether SYM designates a type?
+	     (emit-type sym)))
 	 (is-internal? (sym pkg)
 	   "Check whether SYM is internal in PKG."
 	   (multiple-value-bind (symbol status)
@@ -189,6 +191,11 @@
   (cxml:with-element "variable-definition"
     (name name "variable")
     (emit-docstring name (documentation name 'variable))))
+
+(defun emit-type (name)
+  (cxml:with-element "type-definition"
+    (name name "type")
+    (emit-docstring name (documentation name 'type))))
 
 (defun emit-function (name)
   (cxml:with-element "function-definition"
@@ -347,6 +354,7 @@
   (cond
     ((or (equal qname "fun")
 	 (equal qname "class")
+	 (equal qname "type")
 	 (equal qname "variable")
 	 (equal qname "slot")
 	 (equal qname "see")
@@ -355,7 +363,7 @@
       (setf (current-name handler) qname)
       (setf (current-kind handler)
 	    (case (intern qname :atdoc)
-	      ((|fun| |class| |variable|) qname)
+	      ((|fun| |class| |type| |variable|) qname)
 	      ((|see| |see-slot|) "fun")
 	      (|see-constructor| "fun")))
       (setf (current-attributes handler) attrs)

@@ -240,6 +240,26 @@
     </page>
   </xsl:template>
 
+  <xsl:template match="type-definition">
+    <page base="../"
+	  pathname="pages/{@id}.html"
+	  title="Type {@name}">
+      <padded>
+	<p class="noindent">
+	  Package:
+	  <a href="{../../@id}.html">
+	    <xsl:value-of select="../../@name"/>
+	  </a>
+	</p>
+	<h2 class="page-title">
+	  Type
+	  <xsl:value-of select="@name"/>
+	</h2>
+	<xsl:call-template name="main"/>
+      </padded>
+    </page>
+  </xsl:template>
+
   <xsl:template match="variable-definition">
     <page base="../"
 	  pathname="pages/{@id}.html"
@@ -327,6 +347,14 @@
     <xsl:call-template name="index-entry">
       <xsl:with-param name="packagep" select="$packagep"/>
       <xsl:with-param name="kind" select="'macro'"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xsl:template match="type-definition" mode="symbol-index">
+    <xsl:param name="packagep"/>
+    <xsl:call-template name="index-entry">
+      <xsl:with-param name="packagep" select="$packagep"/>
+      <xsl:with-param name="kind" select="'type'"/>
     </xsl:call-template>
   </xsl:template>
 
@@ -545,6 +573,14 @@
   </xsl:template>
 
   <xsl:template match="class">
+    <a href="{@id}.html">
+      <tt>
+	<xsl:apply-templates/>
+      </tt>
+    </a>
+  </xsl:template>
+
+  <xsl:template match="type">
     <a href="{@id}.html">
       <tt>
 	<xsl:apply-templates/>
