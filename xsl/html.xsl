@@ -1,4 +1,4 @@
-<!--
+<!-- Hey, emacs, please consider this to be -*- xml -*-
     This is the main stylesheet.
     Input must have been cleaned up using cleanup.xsl already.
 
@@ -23,8 +23,10 @@
       <xsl:apply-templates select="documentation/package"/>
       <xsl:apply-templates select="documentation/package/external-symbols/*"/>
       <xsl:apply-templates select="documentation/package/internal-symbols/*"/>	
+      <!-- <xsl:apply-templates select="documentation/package/*/class-definition/direct-slots/*"/> -->
     </pages>
   </xsl:template>
+
 
   <xsl:template name="configuration-attributes">
     <macro:copy-attribute name="logo" path="documentation"/>
@@ -167,6 +169,20 @@
 		<xsl:for-each select="subclasses/subclass">
 		  <xsl:sort select="@id" data-type="text" order="ascending"/>
 		  <xsl:call-template name="class-list"/>
+		</xsl:for-each>
+	      </xsl:when>
+	      <xsl:otherwise>
+		None
+	      </xsl:otherwise>
+	    </xsl:choose>
+	  </div>
+	  <h3>Documented Direct Slots</h3>
+	  <div class="indent">
+	    <xsl:choose>
+	      <xsl:when test="direct-slots/slot">
+		<xsl:for-each select="direct-slots/slot">
+		  <xsl:sort select="@id" data-type="text" order="ascending"/>
+		  <xsl:call-template name="slot-list"/>
 		</xsl:for-each>
 	      </xsl:when>
 	      <xsl:otherwise>
@@ -499,6 +515,26 @@
     <xsl:text>)</xsl:text>
   </xsl:template>
 
+  <xsl:template name="slot-list">
+    <div class="indent">
+      <simple-table>
+        <xsl:value-of select="@name"/>
+	<xsl:text> -- </xsl:text>
+        <xsl:choose>
+          <xsl:when
+            test="documentation-string/short">
+            <xsl:apply-templates select="documentation-string/short"/>
+	    <a href="{@id}.html#details">...</a>
+	  </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates
+              select="documentation-string"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </simple-table>
+    </div>
+  </xsl:template>
+
   <xsl:template name="about-arguments">
     <xsl:param name="label"/>
     <div class="def">
@@ -573,6 +609,14 @@
   </xsl:template>
 
   <xsl:template match="class">
+    <a href="{@id}.html">
+      <tt>
+	<xsl:apply-templates/>
+      </tt>
+    </a>
+  </xsl:template>
+
+  <xsl:template match="slot">
     <a href="{@id}.html">
       <tt>
 	<xsl:apply-templates/>

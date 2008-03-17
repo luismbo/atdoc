@@ -221,6 +221,24 @@
 				      :case :downcase)))))
     (emit-docstring name (documentation name 'function))))
 
+(defun emit-slot (slot-def)
+  (cxml:with-element "slot"
+    (name (closer-mop:slot-definition-name slot-def) "slot")
+    (cxml:attribute "allocation" (munge-name (closer-mop:slot-definition-allocation slot-def) "symbol"))
+    (cxml:attribute "type" (format nil "~A" (closer-mop:slot-definition-type slot-def))) ;; may be a complicated typespec
+    (cxml:with-element "initargs"
+      (dolist (ia (closer-mop:slot-definition-initargs slot-def))
+	(cxml:with-element "initarg" (name ia "symbol"))))
+    (cxml:with-element "readers"
+      (dolist (reader (closer-mop:slot-definition-readers slot-def))
+	(cxml:with-element "reader" (name reader "symbol"))))
+    ;; FIXME: writer methods will be of the form (setf name) which breaks in munge-name
+    ;;     (cxml:with-element "writers"
+    ;;       (dolist (writer (closer-mop:slot-definition-writers slot-def))
+    ;; 	(cxml:attribute "writer" (munge-name writer "writer"))))
+    (emit-docstring (closer-mop:slot-definition-name slot-def)
+		    (documentation slot-def T))))
+
 (defun emit-class (class other-packages)
   (cxml:with-element "class-definition"
     (name (class-name class) "class")
@@ -241,6 +259,10 @@
 			 (random-name (class-name sub) other-packages "class"))
 		       (recurse sub)))))
 	(recurse class)))
+    (unless (typep class 'structure-class)
+      (cxml:with-element "direct-slots"
+	(dolist (slot (closer-mop:class-direct-slots class))
+	  (emit-slot slot))))
     (emit-docstring (class-name class) (documentation class t))))
 
 (defun emit-docstring (package-designator str)
@@ -363,7 +385,7 @@
       (setf (current-name handler) qname)
       (setf (current-kind handler)
 	    (case (intern qname :atdoc)
-	      ((|fun| |class| |type| |variable|) qname)
+	      ((|fun| |class| |type| |variable| |slot|) qname)
 	      ((|see| |see-slot|) "fun")
 	      (|see-constructor| "fun")))
       (setf (current-attributes handler) attrs)
