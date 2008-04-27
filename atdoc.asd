@@ -16,4 +16,4 @@
     :default-component-class atdoc-source-file
     :components ((:file "package")
 		 (:file "atdoc" :depends-on ("package")))
-    :depends-on (:cxml :split-sequence :swank :xuriella :closer-mop))
+    :depends-on (:cxml :split-sequence :swank :xuriella :closer-mop :cl-ppcre))

@@ -131,8 +131,7 @@
   (format nil "~(~A~)__~A__~(~A~)"
 	  (package-name (symbol-package name))
 	  kind
-	  (substitute #\_ #\/
-		      (substitute #\_ #\* (symbol-name name)))))
+	  (cl-ppcre:regex-replace-all "[/*%]" (symbol-name name) "_")))
 
 (defun name (name kind)
   (cxml:attribute "id" (munge-name name kind))
