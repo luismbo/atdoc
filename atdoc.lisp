@@ -184,7 +184,7 @@
     (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
     (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex"))
     (copy-file (magic-namestring "defun.tex") (merge-pathnames "defun.tex")
-	       :if-exists :rename-and-delete)) 
+	       :if-exists :rename-and-delete))
   (when run-tex-p
     (loop while
 	 (search "Rerun to get cross-references right"
@@ -199,12 +199,12 @@
   ;; fixme:
   ;; \ -> $\backslash$
   ;; & -> ???
-  (setf x (cl-ppcre:regex-replace-all "&"
-				      (xpath:string-value x)
-				      "?"))
   (setf x (cl-ppcre:regex-replace-all "([#$~_^{}%])"
 				      (xpath:string-value x)
-				      "\\\\\\1")))
+				      "\\\\\\1"))
+  (setf x (cl-ppcre:regex-replace-all "&"
+				      (xpath:string-value x)
+				      "$\\\\&$")))
 
 (defun munge-name (name kind)
   (format nil "~(~A~)__~A__~(~A~)"

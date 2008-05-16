@@ -81,10 +81,14 @@
     <extra:value-of select="atdoc:escape-latex-string(@name)"/>
     <extra:for-each select="lambda-list/elt">
       <extra:text xml:space="preserve"> </extra:text>
-      <!-- fixme: nicht escapen wegen &optional usw 
-      <extra:value-of select="."/>
--->
-      <extra:value-of select="atdoc:escape-latex-string(.)"/>
+      <xsl:choose>
+	<xsl:when test="@label = 'Function'">
+	  <extra:value-of select="."/>
+	</xsl:when>
+	<xsl:otherwise>
+	  <extra:value-of select="atdoc:escape-latex-string(.)"/>
+	</xsl:otherwise>
+      </xsl:choose>
     </extra:for-each>
 
     <extra:text xml:space="preserve">&#10;&#10;</extra:text>
@@ -94,6 +98,7 @@
   </xsl:template>
 
   <xsl:template match="macro:sc">
+    \bigskip
     <extra:text>\textsc{</extra:text>
     <extra:text>
       <xsl:value-of select="@label"/>

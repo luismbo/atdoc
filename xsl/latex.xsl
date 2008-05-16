@@ -307,7 +307,7 @@
   </xsl:template>
 
   <xsl:template match="return">
-    <macro:sc label="Returns">
+    <macro:sc label="Return Values">
       <xsl:apply-templates/>
     </macro:sc>
   </xsl:template>
