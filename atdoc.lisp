@@ -182,9 +182,9 @@
   (let ((*default-pathname-defaults* (merge-pathnames directory)))
     (apply-stylesheet "macros.xsl" "latex.xsl" ".latex.xsl")
     (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-    (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex")))
-  (copy-file (magic-namestring "contrib/defun.tex") "defun.tex"
-	     :if-exists :rename-and-delete)
+    (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex"))
+    (copy-file (magic-namestring "defun.tex") (merge-pathnames "defun.tex")
+	       :if-exists :rename-and-delete)) 
   (when run-tex-p
     (loop while
 	 (search "Rerun to get cross-references right"
