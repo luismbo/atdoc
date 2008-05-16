@@ -1,15 +1,6 @@
 <!-- Hey, emacs, please consider this to be -*- xml -*-
-    This is the main stylesheet.
-    Input must have been cleaned up using cleanup.xsl already.
 
-    This stylesheet does nearly all of the formatting work, but still keeps
-    all data together in one big XML document.
-
-    A <page> element is produced for each package and symbol.
-
-    The contents of each <page> will be mostly HTML, with the exception
-    of a few formatting elements like <columns> that are replaced later.
-
+    This is an alternative to html.xsl for single-page output.
   -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		xmlns:macro="http://lichteblau.com/macro"
@@ -20,124 +11,50 @@
 
   <xsl:template match="/">
     <pages>
-      <xsl:call-template name="configuration-attributes"/>
+      <macro:copy-attribute name="logo" path="documentation"/>
+      <macro:copy-attribute name="css" path="documentation"/>
+      <macro:copy-attribute name="heading" path="documentation"/>
       <xsl:apply-templates select="documentation"/>
-      <xsl:apply-templates select="documentation/package"/>
-      <xsl:apply-templates select="documentation/package/external-symbols/*"/>
-      <xsl:if test="documentation/@include-internal-symbols-p">
-	<xsl:apply-templates select="documentation/package/internal-symbols/*"/>
-      </xsl:if>
-      <!-- <xsl:apply-templates select="documentation/package/*/class-definition/direct-slots/*"/> -->
     </pages>
   </xsl:template>
 
-
-  <xsl:template name="configuration-attributes">
-    <macro:copy-attribute name="logo" path="documentation"/>
-    <macro:copy-attribute name="css" path="documentation"/>
-    <macro:copy-attribute name="heading" path="documentation"/>
-  </xsl:template>
-
-
-  <!--
-      page generation templates
-    -->
-
   <xsl:template match="documentation">
     <main-page title="{@index-title}">
-      <padded>
-	Index of packages:
-      </padded>
-      
-      <columns>
-	<column width="60%">
-	  <padded>
-	    <xsl:for-each select="package">
-	      <xsl:variable name="url"
-			    select="concat('pages/', @id, '.html')"/>
-	      <h2 class="page-title">
-		<a href="{$url}">
-		  Package
-		  <xsl:value-of select="@name"/>
-		</a>
-	      </h2>
-	      <div style="left: 100px">
-		<xsl:apply-templates select="documentation-string"/>
-		<div class="indent">
-		  <xsl:if test="sections">
-		    <p><i>About this package:</i></p>
-		    <ul>
-		      <xsl:for-each select="sections/section">
-			<li>
-			  <a href="{$url}#{generate-id()}">
-			    <xsl:value-of select="@section"/>
-			  </a>
-			</li>
-		      </xsl:for-each>
-		    </ul>
-		  </xsl:if>
-		</div>
-	      </div>
-	    </xsl:for-each>
-	  </padded>
-	</column>
-	<column>
-	  <h3><a name="index"></a>Exported Symbol Index</h3>
-	  <simple-table>
-	    <xsl:apply-templates select="package/external-symbols/*"
-				 mode="symbol-index">
-	      <xsl:sort select="@name" data-type="text" order="ascending"/>
-	      <xsl:with-param name="packagep" select="'pages/'"/>
-	    </xsl:apply-templates>
-	  </simple-table>
-	</column>
-      </columns>
-    </main-page>
-  </xsl:template>
-
-  <xsl:template match="package">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Package {@name}">
-      <padded>
-	<xsl:if test="count(../package) > 1">
-	  <p class="noindent">
-	    Up:
-	    <a href="../index.html">
-	      <xsl:value-of select="/documentation/@index-title"/>
-	    </a>
+      <div id="sp-about-packages">
+	<xsl:for-each select="package">
+	  <p>
+	    <i>About <xsl:value-of select="@name"/>:</i>
+	    <xsl:apply-templates select="documentation-string"/>
 	  </p>
-	</xsl:if>
-	<h1>
-	  Package
-	  <xsl:value-of select="@name"/>
-	</h1>
-	<xsl:apply-templates select="documentation-string"/>
-      </padded>
-      <columns>
-	<column width="60%">
-	  <padded>
-	    <xsl:if test="sections">
-	      <div style="margin-left: -30px">
-		<h3>About This Package</h3>
-	      </div>
-	      <xsl:for-each select="sections/section">
-		<a href="#{generate-id()}" style="font-weight: bold">
+	</xsl:for-each>
+      </div>
+
+      <h3>Contents</h3>
+      <div class="indent">
+	<xsl:if test="package/sections">
+	  <ul>
+	    <xsl:for-each select="package/sections/section">
+	      <li>
+		<a href="#{generate-id()}">
 		  <xsl:value-of select="@section"/>
 		</a>
-		<br/>
-	      </xsl:for-each>
-	      <br/>
-	      <xsl:apply-templates select="sections"/>
-	    </xsl:if>
-	  </padded>
-	</column>
-	<column>
-	  <h3><a name="index"></a>Exported Symbol Index</h3>
-	  <xsl:apply-templates select="external-symbols" mode="symbol-index"/>
-	</column>
-      </columns>
-    </page>
+	      </li>
+	    </xsl:for-each>
+	  </ul>
+	</xsl:if>
+      </div>
+
+      <xsl:apply-templates select="package/sections"/>
+
+      <h3><a name="index"></a>Exported Symbol Index</h3>
+      <simple-table>
+	<xsl:apply-templates select="package/external-symbols/*"
+			     mode="symbol-index">
+	  <xsl:sort select="@name" data-type="text" order="ascending"/>
+	  <xsl:with-param name="packagep" select="'pages/'"/>
+	</xsl:apply-templates>
+      </simple-table>
+    </main-page>
   </xsl:template>
 
   <xsl:template match="class-definition">
@@ -308,26 +225,24 @@
     -->
 
   <xsl:template match="arguments">
-    <h3>Arguments</h3>
-    <div class="indent">
-      <ul>
-	<xsl:for-each select="arg">
-	  <li>
-	    <tt>
-	      <xsl:value-of select="@arg"/>
-	    </tt>
-	    <xsl:text> -- </xsl:text>
-	    <xsl:apply-templates/>
-	  </li>
-	</xsl:for-each>
-      </ul>
-    </div>
+    <div class="sph3">Arguments:</div>
+    <ul>
+      <xsl:for-each select="arg">
+	<li>
+	  <tt>
+	    <xsl:value-of select="@arg"/>
+	  </tt>
+	  <xsl:text> -- </xsl:text>
+	  <xsl:apply-templates/>
+	</li>
+      </xsl:for-each>
+    </ul>
   </xsl:template>
 
-  <xsl:template name="main-left">
+  <xsl:template name="main-documentation-string">
     <xsl:choose>
       <xsl:when test="documentation-string">
-	<h3>Details<a name="details"/></h3>
+	<div class="sph3">Details:</div>
 	<xsl:apply-templates select="documentation-string"/>
       </xsl:when>
       <xsl:otherwise>
@@ -457,20 +372,20 @@
 
   <xsl:template name="about-arguments">
     <xsl:param name="label"/>
-    <div class="def">
-      <a href="{../@id}.html">
+    <div class="sp-lambda-list">
+      <b>
 	<xsl:value-of select="$label"/>
 	<xsl:text> </xsl:text>
 	<xsl:value-of select="../@name"/>
-	<xsl:text> (</xsl:text>
-	<xsl:for-each select="elt">
-	  <xsl:if test="position() != 1">
-	    <xsl:text>&#160;</xsl:text>
-	  </xsl:if>
-	  <xsl:value-of select="text()"/>
-	</xsl:for-each>
-	<xsl:text>)</xsl:text>
-      </a>
+      </b>
+      <xsl:text> (</xsl:text>
+      <xsl:for-each select="elt">
+	<xsl:if test="position() != 1">
+	  <xsl:text>&#160;</xsl:text>
+	</xsl:if>
+	<xsl:value-of select="text()"/>
+      </xsl:for-each>
+      <xsl:text>)</xsl:text>
     </div>
   </xsl:template>
 
@@ -592,13 +507,6 @@
     </tr>
   </xsl:template>
 
-  <xsl:template match="return">
-    <h3>Return Value</h3>
-    <div class="indent">
-      <xsl:apply-templates/>
-    </div>
-  </xsl:template>
-
   <xsl:template match="implementation-note">
     <h3>Implementation notes</h3>
     <xsl:apply-templates/>
@@ -609,38 +517,36 @@
   </xsl:template>
 
   <xsl:template match="sections">
-    <xsl:for-each select="section">
-      <h2>
-	<a name="{generate-id()}"/>
-	<xsl:value-of select="@section"/>
-      </h2>
-      <xsl:apply-templates/>
-    </xsl:for-each>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="section">
+    <h3>
+      <a name="{generate-id()}"/>
+      <xsl:value-of select="@section"/>
+    </h3>
+    <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="aboutfun">
-    <xsl:variable name="fun" select="text()"/>
-    <xsl:for-each select="//function-definition[@name=$fun]/lambda-list">
+    <xsl:variable name="fun" select="//function-definition[@name=current()]"/>
+    <xsl:for-each select="$fun/lambda-list">
       <xsl:call-template name="about-arguments">
 	<xsl:with-param name="label" select="'Function'"/>
       </xsl:call-template>
     </xsl:for-each>
-    <div style="margin-left: 3em">
-      <xsl:choose>
-	<xsl:when
-	   test="//function-definition[@name=$fun]/documentation-string//short">
-	  <xsl:for-each select="//function-definition[@name=$fun]">
-	    <xsl:apply-templates select="documentation-string//short"/>
-	    <xsl:text> </xsl:text>
-	    <a href="{@id}.html#details">...</a>
-	  </xsl:for-each>
-	</xsl:when>
-	<xsl:otherwise>
-	  <xsl:apply-templates
-	     select="//function-definition[@name=$fun]/documentation-string"/>
-	</xsl:otherwise>
-      </xsl:choose>
-    </div>
+    <xsl:for-each select="$fun">
+      <div class="sp-definition">
+	<div class="sp-definition-body">
+	  <xsl:apply-templates select="arguments"/>
+	  <div class="sph3">Returns:</div>
+	  <div class="indent">
+	    <xsl:apply-templates select="return/node()"/>
+	  </div>
+	  <xsl:call-template name="main-documentation-string"/>
+	</div>
+      </div>
+    </xsl:for-each>
     <br/>
   </xsl:template>
 

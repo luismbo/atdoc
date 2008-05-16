@@ -4,4 +4,7 @@
 
 (defpackage :atdoc
   (:use :cl)
-  (:export #:generate-documentation))
+  (:export #:generate-html-documentation
+	   #:generate-latex-documentation
+	   #:generate-documentation
+	   #:extract-documentation))

@@ -52,33 +52,48 @@
 			     :output (pathname (magic-namestring output))))
 
 #+sbcl
-(defun apply-stylesheet/xsltproc (stylesheet input output)
+(defun run-shell-command (directory output command &rest args)
+  ;; fixme: escape the namestrings properly, or use a function calling
+  ;; exec rather system.
   (let* ((asdf::*verbose-out* (make-string-output-stream))
 	 (code (asdf:run-shell-command
-		"cd ~S && xsltproc ~S ~S >~S"
-		(magic-namestring *default-pathname-defaults*)
-		(magic-namestring stylesheet)
-		(magic-namestring input)
-		(magic-namestring output))))
+		"cd ~S && ~A~{ ~S~}~@[ >~S~]"
+		directory
+		command
+		args
+		output))
+	 (output (get-output-stream-string asdf::*verbose-out*)))
     (unless (zerop code)
-      (error "running xsltproc failed with code ~A [~%~A~%]"
+      (print output)
+      (error "running ~A failed with code ~A [~%~A~%]"
+	     command
 	     code
-	     (get-output-stream-string asdf::*verbose-out*)))))
+	     output))
+    output))
 
 #+allegro
-(defun apply-stylesheet/xsltproc (stylesheet input output)
+(defun run-shell-command (directory output command &rest args)
+  ;; fixme: escape the namestrings properly, or use a function calling
+  ;; exec rather system.
   (multiple-value-bind (stdout stderr exitcode)
       (excl.osi:command-output
-       (format nil "xsltproc ~S ~S >~S"
-	       (magic-namestring stylesheet)
-	       (magic-namestring input)
-	       (magic-namestring output))
-       :directory (magic-namestring *default-pathname-defaults*)
+       (format nil "~A~{ ~S~}~@[ >~S~]"
+	       command
+	       args
+	       output)
+       :directory directory
        :whole T)
     (declare (ignore stdout))
     (unless (zerop exitcode)
-      (error "running xsltproc failed with code ~A [~%~A~%]"
-	     exitcode stderr))))
+      (error "running ~A failed with code ~A [~%~A~%]"
+	     command exitcode stderr))))
+
+(defun apply-stylesheet/xsltproc (stylesheet input output)
+  (run-shell-command (magic-namestring *default-pathname-defaults*)
+		     (magic-namestring output)
+		     "xsltproc"
+		     (magic-namestring stylesheet)
+		     (magic-namestring input)))
 
 (defun apply-stylesheet (stylesheet input output)
   (funcall *apply-stylesheet* stylesheet input output))
@@ -95,37 +110,97 @@
 	   until (zerop pos)
 	   do (write-sequence buf out :end pos))))))
 
-(defun generate-documentation
+(defvar *include-slot-definitions-p* nil)
+
+(defun extract-documentation (packages directory
+			      &rest keys
+			      &key include-slot-definitions-p
+			      &allow-other-keys)
+  (setf packages (mapcar #'find-package packages))
+  (let ((*include-slot-definitions-p* include-slot-definitions-p))
+    (with-open-file (s (merge-pathnames ".atdoc.xml" directory)
+		       :element-type '(unsigned-byte 8)
+		       :direction :output
+		       :if-does-not-exist :create
+		       :if-exists :rename-and-delete)
+      (cxml:with-xml-output (cxml:make-octet-stream-sink s)
+	(cxml:with-element "documentation"
+	  (loop for (key value) on keys :by #'cddr do
+	       (when value
+		 (cxml:attribute (string-downcase key) value)))
+	  (dolist (package packages)
+	    (emit-package package packages)))))))
+
+(defun generate-documentation (&rest args)
+  (warn "deprecated function GENERATE-DOCUMENTATION called, replaced by GENERATE-HTML-DOCUMENTATION")
+  (apply #'generate-html-documentation args))
+
+(defun generate-html-documentation
     (packages directory &key (index-title "No Title")
                              (heading "No Heading")
-                             css
+                             (css "default.css")
                              (logo nil)
-                             (apply-stylesheets-p t))
-  (unless css
-    (warn "no CSS stylesheet specified, falling back to default.css")
-    (setf css "default.css"))
-  (setf packages (mapcar #'find-package packages))
-  (with-open-file (s (merge-pathnames ".atdoc.xml" directory)
-		     :element-type '(unsigned-byte 8)
-		     :direction :output
-		     :if-does-not-exist :create
-		     :if-exists :rename-and-delete)
-    (cxml:with-xml-output (cxml:make-octet-stream-sink s)
-      (cxml:with-element "documentation"
-	(cxml:attribute "logo" logo)
-	(cxml:attribute "index-title" index-title)
-	(cxml:attribute "css" "index.css")
-	(cxml:attribute "heading" heading)
-	(dolist (package packages)
-	  (emit-package package packages)))))
-  (when apply-stylesheets-p
-    (let ((*default-pathname-defaults* (merge-pathnames directory)))
-      (copy-file (magic-namestring css) "index.css"
-		 :if-exists :rename-and-delete)
-      (apply-stylesheet "macros.xsl" "html.xsl" ".atdoc.html.xsl.out")
-      (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-      (apply-stylesheet ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
-      (apply-stylesheet "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html")))))
+                             (single-page-p nil)
+                             (include-slot-definitions-p t)
+                             (include-internal-symbols-p t))
+  (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
+  (setf include-internal-symbols-p (and include-internal-symbols-p "yes"))
+  (extract-documentation packages
+			 directory
+			 :include-slot-definitions-p include-slot-definitions-p
+			 :include-internal-symbols-p include-internal-symbols-p
+			 :logo logo
+			 :index-title index-title
+			 :css "index.css"
+			 :heading heading)
+  (let ((*default-pathname-defaults* (merge-pathnames directory)))
+    (copy-file (magic-namestring css) "index.css"
+	       :if-exists :rename-and-delete)
+    (apply-stylesheet "macros.xsl" "html-common.xsl" ".html-common.xsl")
+    (rename-file ".html-common.xsl" "html-common.xsl")
+    (apply-stylesheet "macros.xsl"
+		      (if single-page-p
+			  "html-singlepage.xsl"
+			  "html.xsl")
+		      ".atdoc.html.xsl.out")
+    (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
+    (apply-stylesheet ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
+    (apply-stylesheet "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html"))))
+
+(defun generate-latex-documentation
+    (packages directory
+     &key (title "No Title")
+          (run-tex-p "pdflatex")
+          (include-slot-definitions-p t))
+  (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
+  (extract-documentation packages
+			 directory
+			 :title title
+			 :include-slot-definitions-p include-slot-definitions-p)
+  (let ((*default-pathname-defaults* (merge-pathnames directory)))
+    (apply-stylesheet "macros.xsl" "latex.xsl" ".latex.xsl")
+    (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
+    (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex")))
+  (when run-tex-p
+    (loop while
+	 (search "Rerun to get cross-references right"
+		 (run-shell-command (magic-namestring directory)
+				    nil
+				    run-tex-p
+				    "documentation")))))
+
+(xpath-sys:define-extension :atdoc "http://www.lichteblau.com/atdoc/")
+
+(xpath-sys:define-xpath-function/eager :atdoc :escape-latex-string (x)
+  ;; fixme:
+  ;; \ -> $\backslash$
+  ;; & -> ???
+  (setf x (cl-ppcre:regex-replace-all "&"
+				      (xpath:string-value x)
+				      "?"))
+  (setf x (cl-ppcre:regex-replace-all "([#$~_^{}%])"
+				      (xpath:string-value x)
+				      "\\\\\\1")))
 
 (defun munge-name (name kind)
   (format nil "~(~A~)__~A__~(~A~)"
@@ -258,7 +333,8 @@
 			 (random-name (class-name sub) other-packages "class"))
 		       (recurse sub)))))
 	(recurse class)))
-    (unless (typep class 'structure-class)
+    (when (and *include-slot-definitions-p*
+	       (not (typep class 'structure-class)))
       (cxml:with-element "direct-slots"
 	(dolist (slot (closer-mop:class-direct-slots class))
 	  (emit-slot slot))))
@@ -316,7 +392,7 @@
 		  (write-char c out))
 		(t
 		  (characters handler (get-output-stream-string out))
-		  (let ((name (read-delimited-string stream "[{")))
+		  (let ((name (read-delimited-string stream "[{ :")))
 		    (when (equal name "end")
 		      (read-char stream)
 		      (unless
@@ -348,11 +424,16 @@
 (defun parse-docstring-element (stream handler name)
   (let ((close t)
 	(arg nil)
-	(attrs '()))
-    (when (eql (read-char stream) #\[)
+	(attrs '())
+	(first-char (read-char stream)))
+    (when (eql first-char #\[)
       (setf arg (read-delimited-string stream "]" t))
-      (unless (eql (read-char stream) #\{)
-	(error "expected opening brace after closing bracket")))
+      (setf first-char (read-char stream)))
+    (case first-char
+      (#\{)
+;;;       (#\space)
+;;;       (#\: )
+      (t (error "expected opening brace, space, or colon")))
     (when (equal name "begin")
       (setf name (read-delimited-string stream "}" t))
       (setf close name))
@@ -384,8 +465,8 @@
       (setf (current-name handler) qname)
       (setf (current-kind handler)
 	    (case (intern qname :atdoc)
-	      ((|fun| |class| |type| |variable| |slot|) qname)
-	      ((|see| |see-slot|) "fun")
+	      ((|fun| |class| |type| |variable|) qname)
+	      ((|see| |see-slot| |slot|) "fun")
 	      (|see-constructor| "fun")))
       (setf (current-attributes handler) attrs)
       (setf (current-text handler) ""))
