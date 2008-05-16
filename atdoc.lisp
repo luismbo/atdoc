@@ -175,23 +175,36 @@
           (run-tex-p "pdflatex")
           (include-slot-definitions-p t))
   (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
+  (format t "Extracting docstrings...~%")
   (extract-documentation packages
 			 directory
 			 :title title
 			 :include-slot-definitions-p include-slot-definitions-p)
+  (format t "Generating .tex...~%")
   (let ((*default-pathname-defaults* (merge-pathnames directory)))
     (apply-stylesheet "macros.xsl" "latex.xsl" ".latex.xsl")
     (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
     (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex"))
     (copy-file (magic-namestring "defun.tex") (merge-pathnames "defun.tex")
-	       :if-exists :rename-and-delete))
-  (when run-tex-p
-    (loop while
-	 (search "Rerun to get cross-references right"
-		 (run-shell-command (magic-namestring directory)
-				    nil
-				    run-tex-p
-				    "documentation")))))
+	       :if-exists :rename-and-delete)
+    (let ((i 0))
+      (flet ((doit ()
+	       (format t "Running pdflatex (~D)...~%" (incf i))
+	       (run-shell-command (magic-namestring directory)
+				  nil
+				  run-tex-p
+				  "documentation")))
+	(when run-tex-p
+	  (loop while
+	       (search "Rerun to get cross-references right"
+		       (doit)))
+	  (format t "Running makeindex...~%")
+	  (run-shell-command (magic-namestring directory)
+			     nil
+			     "makeindex"
+			     "documentation.idx")
+	  (doit)))
+      (merge-pathnames "documentation.pdf"))))
 
 (xpath-sys:define-extension :atdoc "http://www.lichteblau.com/atdoc/")
 
