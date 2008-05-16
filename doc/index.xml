@@ -53,7 +53,7 @@
     <a href="http://common-lisp.net/project/cxml">Closure XML</a>, 
     <a href="http://www.cliki.net/SPLIT-SEQUENCE">Split sequence</a>,
     <a href="http://www.cliki.net/SLIME">Slime's swank</a>,
-    <a href="http://repo.or.cz/w/xuriella.git">Xuriella XSLT</a>,
+    <a href="http://common-lisp.net/project/xuriella/">Xuriella XSLT</a>,
     <a href="http://www.cliki.net/closer-mop">Closer-MOP</a>,
     and their dependencies.
   </p>
@@ -65,6 +65,12 @@
   <pre>$ ln -sf `pwd`/atdoc.asd /path/to/your/registry/
 * (asdf:operate 'asdf:load-op :atdoc)</pre>
 
+  <h3>Usage</h3>
+  <p>
+    Please refer to the <a href="api/index.html">API documentation</a>
+    for details, or see below for an example.
+  </p>
+
   <h3>Sample Documentation</h3>
   <p>
     As an example, I have chosen code from the
@@ -73,7 +79,7 @@
       Lisp (3rd edition)
     </a>
     by Winston and Horn.  You can find the code with an ASDF definition
-     in the <tt>example/</tt> subdirectory of the atdoc sources so that
+    in the <a href="http://www.lichteblau.com/git/?p=atdoc.git;a=tree;f=example">example/</a> subdirectory of the atdoc sources so that
      you can easily compile it yourself.  The code included is the
      Blocks World, from chapters 21 (<i>"The Blocks World with Classes
      and Methods"</i>) and 22 (<i>"Answering Questions about
@@ -87,18 +93,13 @@
    output-directory
    :index-title "Blocks World API reference"
    :heading "The Blocks World"
-   :single-page-p t      ;; optional
+   :single-page-p t      ;optional
    :include-internal-symbols-p nil)</pre>
   <p>and</p>
   <pre>(atdoc:generate-latex-documentation
    '(:blocks-world :blocks-world-goals)
    output-directory
    :title "The Blocks World")</pre>
-
-  <h3>Usage</h3>
-  <p>
-    Please refer to the <a href="api/index.html">API documentation</a>.
-  </p>
 
   <h3>Writing a documentation string</h3>
   <p>
