@@ -370,13 +370,13 @@
 
 (defgeneric add-support (object support)
   (:documentation
-   "@arg[object]: a @class movable-block
-    @arg[support]: a @class basic-block
-    @return: a boolean
-    @short: Note that @code object has been put onto @code support.
+   "@arg[object]{a @class{movable-block}}
+    @arg[support]{a @class{basic-block}}
+    @return{a boolean}
+    @short{Note that @code{object} has been put onto @code{support}.}
 
-    This function maintains the slots @fun block-supported-by
-    and @fun block-support-for."))
+    This function maintains the slots @fun{block-supported-by}
+    and @fun{block-support-for}."))
 
 (defmethod add-support ((object movable-block)
                         (support basic-block))

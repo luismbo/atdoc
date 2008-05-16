@@ -116,6 +116,20 @@
 			      &rest keys
 			      &key include-slot-definitions-p
 			      &allow-other-keys)
+  "@arg[packages]{List of package designators.
+     Documentation will be generated for these packages.}
+   @arg[directory]{A pathname specifying a directory.
+     The output file will be written to this directory, which must already
+     exist.}
+   @arg[include-slot-definitions-p]{A boolean.}
+   @arg[keys]{Extra parameters for stylesheets.}
+   Extracts docstrings from @code{packages} and writes them in XML syntax
+   to .atdoc.xml in the specified directory.
+
+   With @code{include-slot-definitions-p}, class documentation will include
+   a list of direct slots.
+
+   Extra parameters will be inserted as attributes on the root element."
   (setf packages (mapcar #'find-package packages))
   (let ((*include-slot-definitions-p* include-slot-definitions-p))
     (with-open-file (s (merge-pathnames ".atdoc.xml" directory)
@@ -132,6 +146,7 @@
 	    (emit-package package packages)))))))
 
 (defun generate-documentation (&rest args)
+  "A deprecated alias for @fun{generate-html-documentation}."
   (warn "deprecated function GENERATE-DOCUMENTATION called, replaced by GENERATE-HTML-DOCUMENTATION")
   (apply #'generate-html-documentation args))
 
@@ -143,6 +158,40 @@
                              (single-page-p nil)
                              (include-slot-definitions-p t)
                              (include-internal-symbols-p t))
+  "@arg[packages]{List of package designators.
+     Documentation will be generated for these packages.}
+   @arg[directory]{A pathname specifying a directory.
+     All output files and temporary data will be written
+     to this directory, which must already exist.}
+   @arg[index-title]{This string will be
+     used as the title of the main page, index.html.
+     (Other pages will be named according to the object they are
+     documenting.)}
+   @arg[heading]{This string will be used as a visible title on top of
+     every page.}
+   @arg[logo]{Deprecated.}
+   @arg[css]{A pathname or string pointing to a cascading stylesheet (CSS)
+     file. This file will be copied to the target directory under the name
+     index.css. If this argument is a string and does not start with a dot, it
+     will be taken as namestring relative to the atdoc/css  directory.}
+   @arg[single-page-p]{A boolean.}
+   @arg[include-slot-definitions-p]{A boolean.}
+   @arg[include-internal-symbols-p]{A boolean.}
+   @return{The pathname of the generated file index.xml.}
+   Generates HTML documentation for @code{packages}.
+
+   With @code{single-page-p}, all documentation is assembled as a single
+   page called index.html.  Otherwise, index.html will include only
+   a symbol index and a summary of each package, with links to other pages.
+
+   With include-slot-definitions-p, pages for symbols that are not exported
+   will be included, so that documentation for exported symbols can safely
+   refer to internal pages (but internal symbols will not be included in
+   the symbol index automatically).  This option has no effect if
+   single-page-p is enabled.
+
+   With @code{include-slot-definition}, class documentation will include
+   a list of direct slots."
   (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
   (setf include-internal-symbols-p (and include-internal-symbols-p "yes"))
   (extract-documentation packages
@@ -174,6 +223,21 @@
      &key (title "No Title")
           (run-tex-p "pdflatex")
           (include-slot-definitions-p t))
+  "@arg[packages]{List of package designators.
+     Documentation will be generated for these packages.}
+   @arg[directory]{A pathname specifying a directory.
+     All output files and temporary data will be written
+     to this directory, which must already exist.}
+   @arg[title]{This string will be used as the document's title.}
+   @arg[include-slot-definitions-p]{A boolean.}
+   @return{The pathname of the generated file documentation.pdf, or nil.}
+   Generates TeX documentation for @code{packages}.
+
+   With @code{run-tex-p} (the default), pdflatex is run automatically to
+   generate a PDF file.
+
+   With @code{include-slot-definition}, class documentation will include
+   a list of direct slots."
   (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
   (format t "Extracting docstrings...~%")
   (extract-documentation packages

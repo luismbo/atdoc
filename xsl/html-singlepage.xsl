@@ -54,6 +54,7 @@
 	  <xsl:with-param name="packagep" select="'pages/'"/>
 	</xsl:apply-templates>
       </simple-table>
+      <div style="height: 10em"/>
     </main-page>
   </xsl:template>
 
@@ -539,10 +540,12 @@
       <div class="sp-definition">
 	<div class="sp-definition-body">
 	  <xsl:apply-templates select="arguments"/>
-	  <div class="sph3">Returns:</div>
-	  <div class="indent">
-	    <xsl:apply-templates select="return/node()"/>
-	  </div>
+	  <xsl:if test="return">
+	    <div class="sph3">Returns:</div>
+	    <div class="indent">
+	      <xsl:apply-templates select="return/node()"/>
+	    </div>
+	  </xsl:if>
 	  <xsl:call-template name="main-documentation-string"/>
 	</div>
       </div>

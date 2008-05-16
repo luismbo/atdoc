@@ -1,4 +1,4 @@
-<page title="atdoc: HTML documentation generation">
+<page title="atdoc: Common Lisp documentation generation">
   <p>
     Atdoc generates documentation
     for <a href="http://en.wikipedia.org/wiki/Common_Lisp">Common
@@ -6,12 +6,36 @@
     extracts <a
     href="http://www.lispworks.com/documentation/HyperSpec/Body/f_docume.htm">documention
     strings</a>
-    written using a custom markup language and generates HTML pages.
+    written using a custom markup language and generates HTML pages or
+    TeX documents.
   </p>
   <p>
     atdoc was written
     by <a href="mailto:david@lichteblau.com">David
       Lichteblau</a> and is available under an X11-style license.
+  </p>
+
+  <h3>Output formats</h3>
+  <p>
+    Atdoc can currently generate documentation in these formats:
+    <ul>
+      <li>
+	HTML, one page for each definition, with extra pages containing
+	the package and overview text for its definitions
+	(<a href="../example/multi-page/index.html">example</a>)
+      </li>
+      <li>
+	HTML, all on one page
+	(<a href="../example/single-page/index.html">example</a>)
+      </li>
+      <li>
+	TeX, for printable PDFs
+	(<a href="../example/tex/documentation.pdf">example</a>)
+      </li>
+    </ul>
+  </p>
+  <p>
+    (For PDF generation, an installation of LaTeX is required.)
   </p>
 
   <h3>Download and Installation</h3>
@@ -21,6 +45,8 @@
     <a href="http://www.lichteblau.com/atdoc/download/">atdoc
     tarball</a>, or get it from
     git: <tt>http://www.lichteblau.com/git/atdoc.git</tt>
+    (<a href="http://www.lichteblau.com/git/?p=atdoc.git;a=summary"
+	>gitweb</a>)
   </p>
   <p>
     atdoc needs
@@ -55,87 +81,23 @@
      taken from the publically available <tt>lisp3</tt> tarball and is
      covered by its own license, different from the license of atdoc.
   </p>
-  <p>
-    See the atdoc-generated
-    <a href="../example/index.html">documentation for the Blocks World</a>.
-  </p>
-  <p>It was generated using this atdoc invocation:</p>
-  <pre>(atdoc:generate-documentation '(:blocks-world :blocks-world-goals)
-			      "/home/david/src/lisp/atdoc/example/"
-			      :index-title "Blocks World API reference"
-			      :heading "The Blocks World"
-			      :css "orange-sans.css")</pre>
+  <p>The examples linked above were generated using:</p>
+  <pre>(atdoc:generate-html-documentation
+   '(:blocks-world :blocks-world-goals)
+   output-directory
+   :index-title "Blocks World API reference"
+   :heading "The Blocks World"
+   :single-page-p t      ;; optional
+   :include-internal-symbols-p nil)</pre>
+  <p>and</p>
+  <pre>(atdoc:generate-latex-documentation
+   '(:blocks-world :blocks-world-goals)
+   output-directory
+   :title "The Blocks World")</pre>
 
   <h3>Usage</h3>
   <p>
-    atdoc exports only one function, <tt>atdoc:generate-documentation</tt>.
-    It accept the following arguments (see above for an example):
-  </p>
-  <p>
-    <ul>
-      <li>
-	<b>packages</b> (required).  List of package designators.
-	Focumentation will be generated for these packages.
-      </li>
-      <li>
-	<b>directory</b> (required).  A pathname specifying a directory. 
-	Multiple files will be created in this directory, and
-	overwritten if they already exist.
-      </li>
-      <li>
-	<b>index-title</b> (keyword argument).  This string will be
-	used as the &lt;title> of the main page, <tt>index.html</tt>.
-	(Other pages will be named according to the object they are
-	documenting.)
-      </li>
-      <li>
-	<b>heading</b> (keyword argument).  This string will be
-	used as a visible title on top of every page.
-      </li>
-      <li>
-	<b>css</b> (keyword argument).  A pathname or string pointing
-	to a cascading stylesheet (CSS) file.  This file will be copied
-	to the target directory under the name <tt>index.css</tt>.
-	If this argument is a string and does not start with a dot, it
-	will be taken as namestring relative to the <tt>atdoc/css</tt>
-	directory.
-      </li>
-      <li>
-	<b>logo</b> (keyword argument).  This optional URI string will
-	should be a relative reference to an image in the target
-	directory and will be inserted as an image element at the upper
-	left corner of every page.
-      </li>
-    </ul>
-  </p>
-  <p>
-    <b>Included Stylesheets</b>. Several CSS files are included as an
-    example, including <tt>blue-serif.css</tt>,
-    <tt>orange-sans.css</tt>, and <tt>boxy.css</tt>.
-  </p>
-  <p>IANAA (I am not an artist) and would welcome submission of better
-  stylesheets.</p>
-
-  <p>
-    <b>Generated files</b>. atdoc will create the following files in the
-    target directory:
-    <ul>
-      <li>
-	<b>index.html</b>.  This is the main page, which shows a list of
-	all packages and a symbol index for all their exported symbols.
-      </li>
-      <li>
-	<b>pages/*.html</b>.  Every package, class, function, and
-	variable is documented on its own page in this subdirectory.
-      </li>
-      <li>
-	<b>index.css</b>.  The is a copy of the file specified by
-	the <tt>css</tt> keyword argument.
-      </li>
-      <li>
-	<b>.atdoc.*</b>.  Temporary files (can be deleted safely).
-      </li>
-    </ul>
+    Please refer to the <a href="api/index.html">API documentation</a>.
   </p>
 
   <h3>Writing a documentation string</h3>
@@ -317,7 +279,15 @@ Second paragraph.</pre>
   <p><b>2008-03-dd</b></p>
   <ul>
     <li>
-      Use Xuriella instead of xsltproc.
+      Added a mode for single-page HTML output, combining several
+      packages into one document.
+    </li>
+    <li>
+      Added a mode for LaTeX output, using pdflatex to generate
+      printable documentation.
+    </li>
+    <li>
+      Uses Xuriella XSLT instead of xsltproc.
     </li>
   </ul>
   <p><b>2007-05-13</b></p>
