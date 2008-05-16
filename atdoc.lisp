@@ -257,14 +257,22 @@
 		 (emit-function sym)))
 	   (when (find-class sym nil)
 	     (emit-class (find-class sym) other-packages))
-	   (when (documentation sym 'type) ;; is there a better CLTL-way to check whether SYM designates a type?
+	   (when (and (documentation sym 'type)
+		      (not (find-class sym nil)))
 	     (emit-type sym)))
-	 (is-internal? (sym pkg)
-	   "Check whether SYM is internal in PKG."
-	   (multiple-value-bind (symbol status)
-	       (intern (symbol-name sym) pkg)
-	     (declare (ignore symbol))
-	     (eq status :internal))))
+	 (internalp (sym)
+	   "Check whether SYM is internal to some package, but not external
+            to any other documented package."
+	   (and (loop
+		   for package in (cons package other-packages)
+		   thereis
+		   (eq (nth-value 1 (find-symbol (symbol-name sym) package))
+		       :internal))
+		(loop
+		   for package in (cons package other-packages)
+		   never
+		   (eq (nth-value 1 (find-symbol (symbol-name sym) package))
+		       :external)))))
     (cxml:with-element "package"
       (cxml:attribute "name" (string-downcase (package-name package)))
       (cxml:attribute "id" (string-downcase (package-name package)))
@@ -275,7 +283,7 @@
 	  (handle-symbol sym)))
       (cxml:with-element "internal-symbols"
 	(do-symbols (sym package)
-	  (when (is-internal? sym package)
+	  (when (internalp sym)
 	    (handle-symbol sym)))))))
 
 (defun emit-variable (name)
@@ -302,7 +310,7 @@
 
 (defun emit-macro (name)
   (cxml:with-element "macro-definition"
-    (name name "macro")
+    (name name "fun")
     (cxml:with-element "lambda-list"
       (dolist (arg (function-arglist (macro-function name)))
 	(cxml:with-element "elt"
