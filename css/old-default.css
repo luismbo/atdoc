@@ -1,0 +1,96 @@
+div.sidebar {
+  float: right;
+  min-width: 15%;
+  padding: 0pt 5pt 5pt 5pt;
+  font-family: verdana, arial;
+}
+
+.nonlink {
+  border-bottom: 1px solid white;
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+#headerlink {
+  border: none;
+}
+
+#headerlink:hover {
+  border: none;
+}
+
+body {
+  color: #000000;
+  background-color: #ffffff;
+  margin-top: 2em;
+  margin-right: 20pt;
+  margin-bottom: 10%;
+  font-family: verdana, arial;
+}
+
+.main {
+  margin-top: 20px;
+  margin-left: 40px;
+}
+
+.padded {
+  padding-left: 30px;
+}
+
+.padded h1,h2 {
+  margin-left: -30px;
+}
+
+h3 {
+  width: 90%;
+  color: #000000;
+  border-bottom: 2px solid #777777;
+   margin-left: -3px;
+   padding-left: 3px;
+}
+
+h4 {
+}
+
+.grau {
+  padding-top: 1em;
+}
+
+.code {
+  border: solid 1px #d0d0d0;
+  padding: 1em;
+  margin-right: 10%;
+}
+
+.indent {
+  margin-left: 20px;
+  padding-bottom: 1em;
+}
+
+.def {
+  padding: 1px 1px 1px 1px;
+  margin-bottom: 1px;
+  font-weight: bold;
+  margin-right: 40px;
+}
+
+.nomargin {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.noindent {
+  margin-left: -30px;
+  padding-bottom: 1em;
+}
+
+#header {
+  margin-right: 22px;
+  border-bottom: 2px solid #777777;
+  font-family: verdana, arial;
+  font-size: 12pt;
+  padding-bottom: 1px;
+}

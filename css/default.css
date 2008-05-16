@@ -5,6 +5,12 @@ div.sidebar {
   font-family: verdana, arial;
 }
 
+a {
+  text-decoration: none;
+  color: black;
+  border-bottom: 1px solid #0070a0;
+}
+
 .nonlink {
   border-bottom: 1px solid white;
   border-top: 1px solid white;
@@ -12,6 +18,12 @@ div.sidebar {
   border-right: 1px solid white;
   padding-top: 1px;
   padding-bottom: 1px;
+}
+
+.sidebar a {
+  border-top: 1px solid #eeeeee;
+  border-left: 1px solid #eeeeee;
+  border-right: 1px solid #eeeeee;
 }
 
 #headerlink {
@@ -25,10 +37,14 @@ div.sidebar {
 body {
   color: #000000;
   background-color: #ffffff;
+  margin: 0 0 0 0;
+/*
   margin-top: 2em;
   margin-right: 20pt;
   margin-bottom: 10%;
+  */
   font-family: verdana, arial;
+  font-size: 8pt;
 }
 
 .main {
@@ -44,12 +60,24 @@ body {
   margin-left: -30px;
 }
 
+h2 {
+  color: #0070a0;
+}
+
+.page-title {
+  color: black;
+}
+
 h3 {
-  width: 90%;
+  background-color: #f4f4f4;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #80d8fd;
   color: #000000;
-  border-bottom: 2px solid #777777;
-   margin-left: -3px;
-   padding-left: 3px;
+  width: 90%;
+  margin-left: -3px;
+  padding-left: 3px;
+  font-weight: bold;
 }
 
 h4 {
@@ -57,6 +85,13 @@ h4 {
 
 .grau {
   padding-top: 1em;
+}
+
+pre {
+  background-color: #eeeeee;
+  border: solid 1px #d0d0d0;
+  padding: 1em;
+  margin-right: 10%;
 }
 
 .code {
@@ -87,10 +122,63 @@ h4 {
   padding-bottom: 1em;
 }
 
+#header table {
+  width: 95%;
+  position: absolute;
+  bottom: 10px;
+  margin-right: 1em;
+}
+
 #header {
-  margin-right: 22px;
-  border-bottom: 2px solid #777777;
+  background: url(header.gif);
+  position: relative; /* so that the table is relativ to this */
+  width: 100%;
+  height: 70px;
   font-family: verdana, arial;
   font-size: 12pt;
   padding-bottom: 1px;
+}
+
+#footer {
+  background: url(footer.gif);
+  height: 70px;
+  margin-top: 60px;
+  padding-top: 1px;
+}
+
+#sp-package-list {
+  /* ... */
+}
+
+#sp-about-packages {
+  /* ... */
+}
+
+.sp-lambda-list {
+  width: 90%;
+  background-color: #f4f4f4;
+  padding: 3px 3px 3px 3px;
+}
+
+.sp-definition {
+  width: 90%;
+  border: 1px solid #cccccc;
+  padding: 3px 3px 3px 3px;
+}
+
+.sp-definition-body {
+  padding-left: 10%;
+}
+
+.sp-definition-body ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.sp-return {
+}
+
+.sph3 {
+  padding-top: 1em;
+  font-weight: bold;
 }
