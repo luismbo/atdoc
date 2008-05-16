@@ -140,13 +140,6 @@ pre {
   padding-bottom: 1px;
 }
 
-#footer {
-  background: url(footer.gif);
-  height: 70px;
-  margin-top: 60px;
-  padding-top: 1px;
-}
-
 #sp-package-list {
   /* ... */
 }
@@ -169,6 +162,7 @@ pre {
 
 .sp-definition-body {
   padding-left: 10%;
+  padding-bottom: 2em;
 }
 
 .sp-definition-body ul {

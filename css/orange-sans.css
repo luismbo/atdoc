@@ -123,3 +123,40 @@ pre {
   padding: 1em;
   margin-right: 10%;
 }
+#sp-package-list {
+  /* ... */
+}
+
+#sp-about-packages {
+  /* ... */
+}
+
+.sp-lambda-list {
+  width: 90%;
+  background-color: #f4f4f4;
+  padding: 3px 3px 3px 3px;
+}
+
+.sp-definition {
+  width: 90%;
+  border: 1px solid #cccccc;
+  padding: 3px 3px 3px 3px;
+}
+
+.sp-definition-body {
+  padding-left: 10%;
+  padding-bottom: 2em;
+}
+
+.sp-definition-body ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.sp-return {
+}
+
+.sph3 {
+  padding-top: 1em;
+  font-weight: bold;
+}
