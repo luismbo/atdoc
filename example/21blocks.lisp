@@ -273,10 +273,10 @@
     @return{t}
     @short{Grasps the block using the hand.}
 
-    Makes sure to ungrasp the block currently grasped, if any.
+    Makes sure to ungrasp the block currently grasped by the @class{hand},
+    if any.
 
-    @see{ungrasp}
-    @see{hand}"))
+    @see{ungrasp}"))
 
 (defmethod grasp ((object movable-block))
   (unless (eq (hand-grasping *hand*) object)
@@ -297,10 +297,9 @@
     @return{a boolean}
     @short{Ungrasps the block if hand is holding it.}
 
-    Returns t if successful, or nil if hand didn't hold this block.
+    Returns t if successful, or nil if the @class{hand} didn't hold this block.
 
-    @see{grasp}
-    @see{hand}"))
+    @see{grasp}"))
 
 (defmethod ungrasp ((object movable-block))
   (when (block-supported-by object)
@@ -371,13 +370,13 @@
 
 (defgeneric add-support (object support)
   (:documentation
-   "@arg[object]{a @class{movable-block}}
-    @arg[support]{a @class{basic-block}}
-    @return{a boolean}
-    @short{Note that @code{object} has been put onto @code{support}.}
+   "@arg[object]: a @class movable-block
+    @arg[support]: a @class basic-block
+    @return: a boolean
+    @short: Note that @code object has been put onto @code support.
 
-    This function maintains the slots @fun{block-supported-by}
-    and @fun{block-support-for}."))
+    This function maintains the slots @fun block-supported-by
+    and @fun block-support-for."))
 
 (defmethod add-support ((object movable-block)
                         (support basic-block))
