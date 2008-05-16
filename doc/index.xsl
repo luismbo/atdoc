@@ -19,7 +19,7 @@
 	<link rel="stylesheet" type="text/css" href="index.css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       </head>
-      <body style="width: 62em">
+      <body style="width: 100%">
 	<xsl:call-template name="header"/>
 	<xsl:apply-templates/>
       </body>

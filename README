@@ -11,8 +11,8 @@
 
 Installation
 
-   atdoc needs Closure XML, Split sequence, Slime's swank, and
-   requires an installation of xsltproc.
+   atdoc needs Closure XML, Split sequence, Slime's swank,
+   Xuriella XSLT, Closer MOP, and their dependencies.
 
    ASDF is used for compilation. Register the .asd file, e.g. by
    symlinking it, then compile atdoc using asdf:operate.
