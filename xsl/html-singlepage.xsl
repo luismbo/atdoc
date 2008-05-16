@@ -9,6 +9,10 @@
 
   <xsl:output method="xml" indent="yes"/>
 
+  <xsl:key name="aboutfun" match="aboutfun" use="string(.)"/>
+  <xsl:key name="aboutclass" match="aboutclass" use="string(.)"/>
+  <xsl:key name="aboutmacro" match="aboutmacro" use="string(.)"/>
+
   <xsl:template match="/">
     <pages>
       <macro:copy-attribute name="logo" path="documentation"/>
@@ -29,24 +33,31 @@
 	</xsl:for-each>
       </div>
 
-      <h3>Contents</h3>
-      <div class="indent">
-	<xsl:if test="package/sections">
+      <xsl:if test="package/sections">
+	<h3>Contents</h3>
+	<div class="indent">
 	  <ul>
-	    <xsl:for-each select="package/sections/section">
+	    <xsl:for-each select="package">
 	      <li>
-		<a href="#{generate-id()}">
-		  <xsl:value-of select="@section"/>
-		</a>
+		Package <xsl:value-of select="@name"/>
+		<ul>
+		  <xsl:for-each select="sections/section">
+		    <li>
+		      <a href="#{generate-id()}">
+			<xsl:value-of select="@section"/>
+		      </a>
+		    </li>
+		  </xsl:for-each>
+		</ul>
 	      </li>
 	    </xsl:for-each>
 	  </ul>
-	</xsl:if>
-      </div>
+	</div>
+      </xsl:if>
 
-      <xsl:apply-templates select="package/sections"/>
+      <xsl:apply-templates select="package"/>
 
-      <h3><a name="index"></a>Exported Symbol Index</h3>
+      <h3><a name="index"></a>Index of exported symbols</h3>
       <simple-table>
 	<xsl:apply-templates select="package/external-symbols/*"
 			     mode="symbol-index">
@@ -57,169 +68,6 @@
       <div style="height: 10em"/>
     </main-page>
   </xsl:template>
-
-  <xsl:template match="class-definition">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Class {@name}">
-      <padded>
-	<p class="noindent">
-	  Package:
-	  <a href="{../../@id}.html">
-	    <xsl:value-of select="../../@name"/>
-	  </a>
-	</p>
-	<h2 class="page-title">
-	  Class <xsl:value-of select="@name"/>
-	</h2>
-      </padded>
-      <macro:maybe-columns
-	 test="see-also
-	       or //class-definition[@id=current()//superclass/@id]
-	       //see-also/slot">
-	<padded>
-	  <h3>Superclasses</h3>
-	  <div class="indent">
-	    <xsl:for-each select="cpl/superclass">
-	      <xsl:call-template name="class-list"/>
-	    </xsl:for-each>
-	  </div>
-	  <h3>Documented Subclasses</h3>
-	  <div class="indent">
-	    <xsl:choose>
-	      <xsl:when test="subclasses/subclass">
-		<xsl:for-each select="subclasses/subclass">
-		  <xsl:sort select="@id" data-type="text" order="ascending"/>
-		  <xsl:call-template name="class-list"/>
-		</xsl:for-each>
-	      </xsl:when>
-	      <xsl:otherwise>
-		None
-	      </xsl:otherwise>
-	    </xsl:choose>
-	  </div>
-	  <xsl:if test="direct-slots">
-	    <h3>Direct Slots</h3>
-	    <div class="indent">
-	      <xsl:choose>
-		<xsl:when test="direct-slots/slot">
-		  <xsl:for-each select="direct-slots/slot">
-		    <xsl:sort select="@id" data-type="text" order="ascending"/>
-		    <xsl:call-template name="slot-list"/>
-		  </xsl:for-each>
-		</xsl:when>
-		<xsl:otherwise>
-		  None
-		</xsl:otherwise>
-	      </xsl:choose>
-	    </div>
-	  </xsl:if>
-	  <xsl:call-template name="main-left"/>
-	</padded>
-      </macro:maybe-columns>
-    </page>
-  </xsl:template>
-
-  <xsl:template match="function-definition">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Function {@name}">
-      <padded>
-	<p class="noindent">
-	  Package:
-	  <a href="{../../@id}.html">
-	    <xsl:value-of select="../../@name"/>
-	  </a>
-	</p>
-	<h2 class="page-title">
-	  Function
-	  <xsl:value-of select="@name"/>
-	</h2>
-      </padded>
-      <macro:maybe-columns test="see-also">
-	<padded>
-          <h3>Lambda List</h3>
-	  <div class="indent">
-	    <xsl:apply-templates select="lambda-list"/>
-	  </div>
-	  <xsl:apply-templates select="arguments"/>
-	  <xsl:apply-templates select="return"/>
-	  <xsl:call-template name="main-left"/>
-	</padded>
-      </macro:maybe-columns>
-    </page>
-  </xsl:template>
-
-  <xsl:template match="macro-definition">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Macro {@name}">
-      <padded>
-	<p class="noindent">
-	  Package:
-	  <a href="{../../@id}.html">
-	    <xsl:value-of select="../../@name"/>
-	  </a>
-	</p>
-	<h2 class="page-title">
-	  Macro
-	  <xsl:value-of select="@name"/>
-	</h2>
-      </padded>
-      <macro:maybe-columns test="see-also">
-	<padded>
-          <h3>Lambda List</h3>
-	  <div class="indent">
-	    <xsl:apply-templates select="lambda-list"/>
-	  </div>
-	  <xsl:apply-templates select="arguments"/>
-	  <xsl:apply-templates select="return"/>
-	  <xsl:call-template name="main-left"/>
-	</padded>
-      </macro:maybe-columns>
-    </page>
-  </xsl:template>
-
-  <xsl:template match="type-definition">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Type {@name}">
-      <padded>
-	<p class="noindent">
-	  Package:
-	  <a href="{../../@id}.html">
-	    <xsl:value-of select="../../@name"/>
-	  </a>
-	</p>
-	<h2 class="page-title">
-	  Type
-	  <xsl:value-of select="@name"/>
-	</h2>
-	<xsl:call-template name="main"/>
-      </padded>
-    </page>
-  </xsl:template>
-
-  <xsl:template match="variable-definition">
-    <page base="../"
-	  pathname="pages/{@id}.html"
-	  title="Variable {@name}">
-      <padded>
-	<p class="noindent">
-	  Package:
-	  <a href="{../../@id}.html">
-	    <xsl:value-of select="../../@name"/>
-	  </a>
-	</p>
-	<h2 class="page-title">
-	  Variable
-	  <xsl:value-of select="@name"/>
-	</h2>
-	<xsl:call-template name="main"/>
-      </padded>
-    </page>
-  </xsl:template>
-
 
   <!--
       Other templates
@@ -241,6 +89,35 @@
   </xsl:template>
 
   <xsl:template name="main-documentation-string">
+    <xsl:if test="see-also/constructor">
+      <div class="sph3">Returned by:</div>
+      <div>
+ 	<ul>
+	  <xsl:apply-templates select="see-also/constructor/see"/>
+	</ul>
+      </div>
+    </xsl:if>
+    <xsl:if test="see-also/slot">
+      <div class="sph3">Slot Access Functions:</div>
+      <div>
+	<ul>
+	  <xsl:apply-templates select="see-also/slot/see"/>
+	</ul>
+      </div>
+    </xsl:if>
+    <xsl:if
+       test="//class-definition[@id=current()//superclass/@id]
+	     //see-also
+	     /slot">
+      <div class="sph3">Inherited Slot Access Functions:</div>
+      <div>
+	<ul>
+	  <xsl:apply-templates
+	     select="//class-definition[@id=current()//superclass/@id]
+		     //see-also/slot/see"/>
+	</ul>
+      </div>
+    </xsl:if>
     <xsl:choose>
       <xsl:when test="documentation-string">
 	<div class="sph3">Details:</div>
@@ -253,49 +130,17 @@
       </xsl:otherwise>
     </xsl:choose>
     <xsl:apply-templates select="implementation-note"/>
-  </xsl:template>
-
-  <xsl:template name="main-right">
-    <xsl:if test="see-also/constructor">
-      <h3>Returned by</h3>
-      <div class="indent">
-	<simple-table>
-	  <xsl:apply-templates select="see-also/constructor/see"/>
-	</simple-table>
-      </div>
-    </xsl:if>
-    <xsl:if test="see-also/slot">
-      <h3>Slot Access Functions</h3>
-      <div class="indent">
-	<simple-table>
-	  <xsl:apply-templates select="see-also/slot/see"/>
-	</simple-table>
-      </div>
-    </xsl:if>
-    <xsl:if
-       test="//class-definition[@id=current()//superclass/@id]
-	     //see-also
-	     /slot">
-      <h3>Inherited Slot Access Functions</h3>
-      <div class="indent">
-	<simple-table>
-	  <xsl:apply-templates
-	     select="//class-definition[@id=current()//superclass/@id]
-		     //see-also/slot/see"/>
-	</simple-table>
-      </div>
-    </xsl:if>
     <xsl:if test="see-also/other|see-also/auto">
-      <h3>See also</h3>
-      <div class="indent">
-	<simple-table>
+      <div class="sph3">See also:</div>
+      <div>
+	<ul>
 	  <xsl:for-each select="see-also/other/see|see-also/auto/see">
 	    <xsl:variable name="name" select="text()"/>
 	    <xsl:if test="not(preceding-sibling::see[text() = $name])">
 	      <xsl:apply-templates select="."/>
 	    </xsl:if>
 	  </xsl:for-each>
-	</simple-table>
+	</ul>
       </div>
     </xsl:if>
   </xsl:template>
@@ -312,7 +157,7 @@
     </xsl:if>
     <xsl:choose>
       <xsl:when test="@id">
-	<a href="{@id}.html">
+	<a href="#{@id}">
 	  <tt>
 	    <xsl:if test="@status = 'INTERNAL'">
 	      <xsl:value-of select="@package"/>
@@ -360,7 +205,7 @@
           <xsl:when
             test="documentation-string/short">
             <xsl:apply-templates select="documentation-string/short"/>
-	    <a href="{@id}.html#details">...</a>
+	    <a href="#{@id}">...</a>
 	  </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates
@@ -371,22 +216,25 @@
     </div>
   </xsl:template>
 
-  <xsl:template name="about-arguments">
+  <xsl:template name="definition">
     <xsl:param name="label"/>
+    <a name="{@id}"/>
     <div class="sp-lambda-list">
       <b>
 	<xsl:value-of select="$label"/>
 	<xsl:text> </xsl:text>
-	<xsl:value-of select="../@name"/>
+	<xsl:value-of select="@name"/>
       </b>
-      <xsl:text> (</xsl:text>
-      <xsl:for-each select="elt">
-	<xsl:if test="position() != 1">
-	  <xsl:text>&#160;</xsl:text>
-	</xsl:if>
-	<xsl:value-of select="text()"/>
-      </xsl:for-each>
-      <xsl:text>)</xsl:text>
+      <xsl:if test="lambda-list">
+	<xsl:text> (</xsl:text>
+	<xsl:for-each select="lambda-list/elt">
+	  <xsl:if test="position() != 1">
+	    <xsl:text>&#160;</xsl:text>
+	  </xsl:if>
+	  <xsl:value-of select="text()"/>
+	</xsl:for-each>
+	<xsl:text>)</xsl:text>
+      </xsl:if>
     </div>
   </xsl:template>
 
@@ -437,7 +285,7 @@
   </xsl:template>
 
   <xsl:template match="fun">
-    <a href="{@id}.html">
+    <a href="#{@id}">
       <tt>
 	<xsl:apply-templates/>
       </tt>
@@ -445,7 +293,7 @@
   </xsl:template>
 
   <xsl:template match="class">
-    <a href="{@id}.html">
+    <a href="#{@id}">
       <tt>
 	<xsl:apply-templates/>
       </tt>
@@ -453,7 +301,7 @@
   </xsl:template>
 
   <xsl:template match="slot">
-    <a href="{@id}.html">
+    <a href="#{@id}">
       <tt>
 	<xsl:apply-templates/>
       </tt>
@@ -461,7 +309,7 @@
   </xsl:template>
 
   <xsl:template match="type">
-    <a href="{@id}.html">
+    <a href="#{@id}">
       <tt>
 	<xsl:apply-templates/>
       </tt>
@@ -469,7 +317,7 @@
   </xsl:template>
 
   <xsl:template match="variable">
-    <a href="{@id}.html">
+    <a href="#{@id}">
       <tt>
 	<xsl:apply-templates/>
       </tt>
@@ -489,27 +337,23 @@
   </xsl:template>
 
   <xsl:template match="see">
-    <tr>
-      <td>
-	<a href="{@id}.html">
-	  <tt>
-	    <xsl:apply-templates/>
-	  </tt>
-	</a>
-      </td>
+    <li>
+      <a href="#{@id}">
+	<tt>
+	  <xsl:apply-templates/>
+	</tt>
+      </a>
       <xsl:if test="@see">
-	<td>
-	  &#160;&#160;&#160;&#160;
-	  <i>
-	    <xsl:value-of select="@see"/>
-	  </i>
-	</td>
+	&#160;
+	<i>
+	  <xsl:value-of select="@see"/>
+	</i>
       </xsl:if>
-    </tr>
+    </li>
   </xsl:template>
 
   <xsl:template match="implementation-note">
-    <h3>Implementation notes</h3>
+    <div class="sph3">Implementation notes:</div>
     <xsl:apply-templates/>
   </xsl:template>
 
@@ -530,80 +374,124 @@
   </xsl:template>
 
   <xsl:template match="aboutfun">
-    <xsl:variable name="fun" select="//function-definition[@name=current()]"/>
-    <xsl:for-each select="$fun/lambda-list">
-      <xsl:call-template name="about-arguments">
-	<xsl:with-param name="label" select="'Function'"/>
-      </xsl:call-template>
-    </xsl:for-each>
-    <xsl:for-each select="$fun">
-      <div class="sp-definition">
-	<div class="sp-definition-body">
-	  <xsl:apply-templates select="arguments"/>
-	  <xsl:if test="return">
-	    <div class="sph3">Returns:</div>
-	    <div class="indent">
-	      <xsl:apply-templates select="return/node()"/>
-	    </div>
-	  </xsl:if>
-	  <xsl:call-template name="main-documentation-string"/>
-	</div>
-      </div>
-    </xsl:for-each>
-    <br/>
+    <xsl:apply-templates select="//function-definition[@name=current()]"/>
   </xsl:template>
 
   <xsl:template match="aboutmacro">
-    <xsl:variable name="fun" select="text()"/>
-    <xsl:for-each select="//macro-definition[@name=$fun]/lambda-list">
-      <xsl:call-template name="about-arguments">
-	<xsl:with-param name="label" select="'Macro'"/>
-      </xsl:call-template>
-    </xsl:for-each>
-    <div style="margin-left: 3em">
-      <xsl:choose>
-	<xsl:when
-	   test="//macro-definition[@name=$fun]/documentation-string//short">
-	  <xsl:for-each select="//macro-definition[@name=$fun]">
-	    <xsl:apply-templates select="documentation-string//short"/>
-	    <xsl:text> </xsl:text>
-	    <a href="{@id}.html#details">...</a>
-	  </xsl:for-each>
-	</xsl:when>
-	<xsl:otherwise>
-	  <xsl:apply-templates
-	     select="//macro-definition[@name=$fun]/documentation-string"/>
-	</xsl:otherwise>
-      </xsl:choose>
+    <xsl:apply-templates select="//macro-definition[@name=current()]"/>
+  </xsl:template>
+
+  <xsl:template match="aboutclass">
+    <xsl:apply-templates select="//class-definition[@name=current()]
+				 | //type-definition[@name=current()]"/>
+  </xsl:template>
+
+  <xsl:template match="function-definition">
+    <xsl:call-template name="definition">
+      <xsl:with-param name="label" select="'Function'"/>
+    </xsl:call-template>
+    <div class="sp-definition">
+      <div class="sp-definition-body">
+	<xsl:apply-templates select="arguments"/>
+	<xsl:if test="return">
+	  <div class="sph3">Returns:</div>
+	  <div class="indent">
+	    <xsl:apply-templates select="return/node()"/>
+	  </div>
+	</xsl:if>
+	<xsl:call-template name="main-documentation-string"/>
+      </div>
     </div>
     <br/>
   </xsl:template>
 
-  <xsl:template match="aboutclass">
-    <xsl:variable name="name" select="text()"/>
-    <xsl:for-each select="//class-definition[@name=$name]">
-      <div class="def">
-	<a href="{@id}.html">
-	  Class
-	  <xsl:value-of select="@name"/>
-	</a>
+  <xsl:template match="macro-definition">
+    <xsl:call-template name="definition">
+      <xsl:with-param name="label" select="'Macro'"/>
+    </xsl:call-template>
+    <div class="sp-definition">
+      <div class="sp-definition-body">
+	<xsl:apply-templates select="arguments"/>
+	<xsl:if test="return">
+	  <div class="sph3">Returns:</div>
+	  <div class="indent">
+	    <xsl:apply-templates select="return/node()"/>
+	  </div>
+	</xsl:if>
+	<xsl:call-template name="main-documentation-string"/>
       </div>
-    </xsl:for-each>
-    <div style="margin-left: 3em">
-      <xsl:choose>
-	<xsl:when
-	   test="//class-definition[@name=$name]/documentation-string//short">
-	  <xsl:for-each select="//class-definition[@name=$name]">
-	    <xsl:apply-templates select="documentation-string//short"/>
-	    <xsl:text> </xsl:text>
-	    <a href="{@id}.html#details">...</a>
+    </div>
+    <br/>
+  </xsl:template>
+
+  <xsl:template match="class-definition">
+    <xsl:call-template name="definition">
+      <xsl:with-param name="label" select="'Class'"/>
+    </xsl:call-template>
+    <div class="sp-definition">
+      <div class="sp-definition-body">
+	<div class="sph3">Superclasses:</div>
+	<div class="indent">
+	  <xsl:for-each select="cpl/superclass">
+	    <xsl:call-template name="class-list"/>
 	  </xsl:for-each>
-	</xsl:when>
-	<xsl:otherwise>
-	  <xsl:apply-templates
-	     select="//class-definition[@name=$name]/documentation-string"/>
-	</xsl:otherwise>
-      </xsl:choose>
+	</div>
+	<div class="sph3">Documented Subclasses:</div>
+	<div class="indent">
+	  <xsl:choose>
+	    <xsl:when test="subclasses/subclass">
+	      <xsl:for-each select="subclasses/subclass">
+		<xsl:sort select="@id" data-type="text" order="ascending"/>
+		<xsl:call-template name="class-list"/>
+	      </xsl:for-each>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      None
+	    </xsl:otherwise>
+	  </xsl:choose>
+	</div>
+	<xsl:if test="direct-slots">
+	  <div class="sph3">Direct Slots:</div>
+	  <div class="indent">
+	    <xsl:choose>
+	      <xsl:when test="direct-slots/slot">
+		<xsl:for-each select="direct-slots/slot">
+		  <xsl:sort select="@id" data-type="text" order="ascending"/>
+		  <xsl:call-template name="slot-list"/>
+		</xsl:for-each>
+	      </xsl:when>
+	      <xsl:otherwise>
+		None
+	      </xsl:otherwise>
+	    </xsl:choose>
+	  </div>
+	</xsl:if>
+	<xsl:call-template name="main-documentation-string"/>
+      </div>
+    </div>
+    <br/>
+  </xsl:template>
+
+  <xsl:template match="type-definition">
+    <xsl:call-template name="definition">
+      <xsl:with-param name="label" select="'Type'"/>
+    </xsl:call-template>
+    <div class="sp-definition">
+      <div class="sp-definition-body">
+	<xsl:call-template name="main-documentation-string"/>
+      </div>
+    </div>
+    <br/>
+  </xsl:template>
+
+  <xsl:template match="variable-definition">
+    <xsl:call-template name="definition">
+      <xsl:with-param name="label" select="'Variable'"/>
+    </xsl:call-template>
+    <div class="sp-definition">
+      <div class="sp-definition-body">
+	<xsl:call-template name="main-documentation-string"/>
+      </div>
     </div>
     <br/>
   </xsl:template>
@@ -614,6 +502,51 @@
       <span style="color: red">
 	(undocumented)
       </span>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="package">
+    <xsl:apply-templates select="sections/section"/>
+    <xsl:variable name="unreferenced"
+		  select="external-symbols/function-definition[
+			  count(key('aboutfun',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced">
+      <h3>Other functions in <xsl:value-of select="@name"/></h3>
+      <xsl:apply-templates select="$unreferenced">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced2"
+		  select="external-symbols/macro-definition[
+			  count(key('aboutmacro',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced2">
+      <h3>Other macros in <xsl:value-of select="@name"/></h3>
+      <xsl:apply-templates select="$unreferenced2">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced3"
+		  select="external-symbols/class-definition[
+			  count(key('aboutclass',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced3">
+      <h3>Other classes in <xsl:value-of select="@name"/></h3>
+      <xsl:apply-templates select="$unreferenced3">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced4"
+		  select="external-symbols/variable-definition"/>
+    <xsl:if test="$unreferenced4">
+      <h3>Other variables in <xsl:value-of select="@name"/></h3>
+      <xsl:apply-templates select="$unreferenced4">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
     </xsl:if>
   </xsl:template>
 </xsl:stylesheet>

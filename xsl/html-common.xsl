@@ -36,7 +36,22 @@
 	</cell>
       </xsl:if>
       <cell>
-	<a href="{$packagep}{@id}.html">
+	<a>
+	  <xsl:choose>
+	    <xsl:when test="/documentation/@single-page-p">
+	      <xsl:attribute name="href">
+		<xsl:text>#</xsl:text>
+		<xsl:value-of select="@id"/>
+	      </xsl:attribute>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      <xsl:attribute name="href">
+		<xsl:value-of select="$packagep"/>
+		<xsl:value-of select="@id"/>
+		<xsl:text>.html</xsl:text>
+	      </xsl:attribute>
+	    </xsl:otherwise>
+	  </xsl:choose>
 	  <tt>
 	    <xsl:value-of select="@name"/>
 	  </tt>

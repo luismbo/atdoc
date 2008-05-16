@@ -156,7 +156,7 @@
                              (css "default.css")
                              (logo nil)
                              (single-page-p nil)
-                             (include-slot-definitions-p t)
+                             (include-slot-definitions-p nil)
                              (include-internal-symbols-p t))
   "@arg[packages]{List of package designators.
      Documentation will be generated for these packages.}
@@ -194,10 +194,12 @@
    a list of direct slots."
   (setf include-slot-definitions-p (and include-slot-definitions-p "yes"))
   (setf include-internal-symbols-p (and include-internal-symbols-p "yes"))
+  (setf single-page-p (and single-page-p "yes"))
   (extract-documentation packages
 			 directory
 			 :include-slot-definitions-p include-slot-definitions-p
 			 :include-internal-symbols-p include-internal-symbols-p
+			 :single-page-p single-page-p
 			 :logo logo
 			 :index-title index-title
 			 :css "index.css"
@@ -222,7 +224,7 @@
     (packages directory
      &key (title "No Title")
           (run-tex-p "pdflatex")
-          (include-slot-definitions-p t))
+          (include-slot-definitions-p nil))
   "@arg[packages]{List of package designators.
      Documentation will be generated for these packages.}
    @arg[directory]{A pathname specifying a directory.

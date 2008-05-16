@@ -63,18 +63,6 @@
   </xsl:template>
 
   <xsl:template name="main-documentation-string">
-    <xsl:choose>
-      <xsl:when test="documentation-string">
-	<macro:sc label="Details">
-	  <xsl:apply-templates select="documentation-string"/>
-	</macro:sc>
-      </xsl:when>
-      <xsl:otherwise>
-	No documentation string.  Possibly unimplemented or incomplete.
-	<xsl:text>&#10;&#10;</xsl:text>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:apply-templates select="implementation-note"/>
     <xsl:if test="see-also/constructor">
       <macro:sc label="Returned by">
  	<macro:itemize>
@@ -101,6 +89,18 @@
 	</macro:itemize>
       </macro:sc>
     </xsl:if>
+    <xsl:choose>
+      <xsl:when test="documentation-string">
+	<macro:sc label="Details">
+	  <xsl:apply-templates select="documentation-string"/>
+	</macro:sc>
+      </xsl:when>
+      <xsl:otherwise>
+	No documentation string.  Possibly unimplemented or incomplete.
+	<xsl:text>&#10;&#10;</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="implementation-note"/>
     <xsl:if test="see-also/other|see-also/auto">
       <macro:sc label="See also">
 	<macro:itemize>
