@@ -21,7 +21,7 @@
   </xsl:template>    
 
   <xsl:template match="documentation">
-    \documentclass[a4paper]{article}
+    \documentclass[a4paper]{report}
     \pagestyle{plain}
     %\usepackage{amsmath}
     %\usepackage{amssymb}
@@ -42,10 +42,11 @@
     \title{<macro:escaped select="@title"/>}
     %\date{}
     \maketitle
+
     \tableofcontents
     \newpage
 
-    <xsl:apply-templates select="package/sections"/>
+    <xsl:apply-templates select="package"/>
 
     <xsl:variable name="unreferenced"
 		  select="package/external-symbols/function-definition[
@@ -292,8 +293,10 @@
     <xsl:text>&#10;&#10;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="sections">
-    <xsl:apply-templates/>
+  <xsl:template match="package">
+    \chapter{The <macro:escaped select="@name"/> package}
+    <xsl:apply-templates select="documentation-string"/>
+    <xsl:apply-templates select="sections/section"/>
   </xsl:template>
 
   <xsl:template match="section">
@@ -303,6 +306,33 @@
       section{<macro:escaped select="@section"/>}
       \label{<macro:escaped select="generate-id()"/>}
     </macro:normalize>
+    <xsl:if test="aboutfun|aboutmacro|aboutclass">
+      In this section:
+      \begin{itemize}
+      <xsl:for-each select="aboutfun|aboutmacro|aboutclass">
+	\item
+	<xsl:choose>
+	  <xsl:when test="local-name() = 'aboutfun'">
+	    <xsl:for-each select="//function-definition[@name=current()]">
+	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
+	    </xsl:for-each>
+	  </xsl:when>
+
+	  <xsl:when test="local-name() = 'aboutmacro'">
+	    <xsl:for-each select="//macro-definition[@name=current()]">
+	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
+	    </xsl:for-each>
+	  </xsl:when>
+
+	  <xsl:when test="local-name() = 'aboutclass'">
+	    <xsl:for-each select="//class-definition[@name=current()]">
+	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
+	    </xsl:for-each>
+	  </xsl:when>
+	</xsl:choose>
+      </xsl:for-each>
+      \end{itemize}
+    </xsl:if>
     <xsl:apply-templates/>
   </xsl:template>
 

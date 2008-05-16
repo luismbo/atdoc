@@ -188,22 +188,24 @@
     (copy-file (magic-namestring "defun.tex") (merge-pathnames "defun.tex")
 	       :if-exists :rename-and-delete)
     (let ((i 0))
-      (flet ((doit ()
-	       (format t "Running pdflatex (~D)...~%" (incf i))
-	       (run-shell-command (magic-namestring directory)
-				  nil
-				  run-tex-p
-				  "documentation")))
+      (labels ((latex1 ()
+		 (format t "Running pdflatex (~D)...~%" (incf i))
+		 (run-shell-command (magic-namestring directory)
+				    nil
+				    run-tex-p
+				    "documentation"))
+	       (latex ()
+		 (loop while
+		      (search "Rerun to get cross-references right"
+			      (latex1)))))
 	(when run-tex-p
-	  (loop while
-	       (search "Rerun to get cross-references right"
-		       (doit)))
+	  (latex)
 	  (format t "Running makeindex...~%")
 	  (run-shell-command (magic-namestring directory)
 			     nil
 			     "makeindex"
 			     "documentation.idx")
-	  (doit)))
+	  (latex)))
       (merge-pathnames "documentation.pdf"))))
 
 (xpath-sys:define-extension :atdoc "http://www.lichteblau.com/atdoc/")
