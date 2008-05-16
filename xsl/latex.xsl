@@ -48,48 +48,6 @@
 
     <xsl:apply-templates select="package"/>
 
-    <xsl:variable name="unreferenced"
-		  select="package/external-symbols/function-definition[
-			  count(key('aboutfun',@name))=0
-			  ]"/>
-    <xsl:if test="$unreferenced">
-      \section{Other functions}
-      <xsl:apply-templates select="$unreferenced">
-	<xsl:sort select="@id" data-type="text" order="ascending"/>
-      </xsl:apply-templates>
-    </xsl:if>
-
-    <xsl:variable name="unreferenced2"
-		  select="package/external-symbols/macro-definition[
-			  count(key('aboutmacro',@name))=0
-			  ]"/>
-    <xsl:if test="$unreferenced2">
-      \section{Other macros}
-      <xsl:apply-templates select="$unreferenced2">
-	<xsl:sort select="@id" data-type="text" order="ascending"/>
-      </xsl:apply-templates>
-    </xsl:if>
-
-    <xsl:variable name="unreferenced3"
-		  select="package/external-symbols/class-definition[
-			  count(key('aboutclass',@name))=0
-			  ]"/>
-    <xsl:if test="$unreferenced3">
-      \section{Other classes}
-      <xsl:apply-templates select="$unreferenced3">
-	<xsl:sort select="@id" data-type="text" order="ascending"/>
-      </xsl:apply-templates>
-    </xsl:if>
-
-    <xsl:variable name="unreferenced4"
-		  select="package/external-symbols/variable-definition"/>
-    <xsl:if test="$unreferenced4">
-      \section{Other variables}
-      <xsl:apply-templates select="$unreferenced4">
-	<xsl:sort select="@id" data-type="text" order="ascending"/>
-      </xsl:apply-templates>
-    </xsl:if>
-
     \printindex
     \end{document}
   </xsl:template>
@@ -297,6 +255,47 @@
     \chapter{The <macro:escaped select="@name"/> package}
     <xsl:apply-templates select="documentation-string"/>
     <xsl:apply-templates select="sections/section"/>
+    <xsl:variable name="unreferenced"
+		  select="external-symbols/function-definition[
+			  count(key('aboutfun',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced">
+      \section{Other functions}
+      <xsl:apply-templates select="$unreferenced">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced2"
+		  select="external-symbols/macro-definition[
+			  count(key('aboutmacro',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced2">
+      \section{Other macros}
+      <xsl:apply-templates select="$unreferenced2">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced3"
+		  select="external-symbols/class-definition[
+			  count(key('aboutclass',@name))=0
+			  ]"/>
+    <xsl:if test="$unreferenced3">
+      \section{Other classes}
+      <xsl:apply-templates select="$unreferenced3">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
+
+    <xsl:variable name="unreferenced4"
+		  select="external-symbols/variable-definition"/>
+    <xsl:if test="$unreferenced4">
+      \section{Other variables}
+      <xsl:apply-templates select="$unreferenced4">
+	<xsl:sort select="@id" data-type="text" order="ascending"/>
+      </xsl:apply-templates>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="section">
