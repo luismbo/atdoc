@@ -141,7 +141,10 @@
 	(cxml:with-element "documentation"
 	  (loop for (key value) on keys :by #'cddr do
 	       (when value
-		 (cxml:attribute (string-downcase key) value)))
+		 (cxml:attribute
+		     (format nil "~A"	;argh... string ./. simple-string
+			     (string-downcase key))
+		   value)))
 	  (dolist (package packages)
 	    (emit-package package packages)))))))
 
@@ -232,6 +235,7 @@
      to this directory, which must already exist.}
    @arg[title]{This string will be used as the document's title.}
    @arg[include-slot-definitions-p]{A boolean.}
+   @arg[run-tex-p]{A boolean.}
    @return{The pathname of the generated file documentation.pdf, or nil.}
    Generates TeX documentation for @code{packages}.
 
@@ -286,6 +290,8 @@
   (setf x (cl-ppcre:regex-replace-all "&"
 				      (xpath:string-value x)
 				      "$\\\\&$")))
+
+(xuriella:define-extension-group :atdoc "http://www.lichteblau.com/atdoc/")
 
 (defun munge-name (name kind)
   (format nil "~(~A~)__~A__~(~A~)"

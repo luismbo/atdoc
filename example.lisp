@@ -38,3 +38,16 @@
    '(:blocks-world :blocks-world-goals)
    output-directory
    :title "The Blocks World"))
+
+;;
+;; Info
+;;
+
+(let* ((base (asdf:component-pathname (asdf:find-system :blocks-world)))
+       (output-directory (merge-pathnames "info/" base)))
+  (ensure-directories-exist output-directory)
+  (atdoc:generate-info-documentation
+   '(:blocks-world :blocks-world-goals)
+   output-directory
+   :name "blocks-world"
+   :title "The Blocks World"))

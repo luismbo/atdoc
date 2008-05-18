@@ -14,6 +14,8 @@
 
 (asdf:defsystem :atdoc
     :default-component-class atdoc-source-file
+    :serial t
     :components ((:file "package")
-		 (:file "atdoc" :depends-on ("package")))
+		 (:file "atdoc")
+		 (:file "info"))
     :depends-on (:cxml :split-sequence :swank :xuriella :closer-mop :cl-ppcre))

@@ -6,6 +6,7 @@
   (:use :cl)
   (:export #:generate-html-documentation
 	   #:generate-latex-documentation
+	   #:generate-info-documentation
 	   #:generate-documentation
 	   #:extract-documentation)
   (:documentation
@@ -17,13 +18,14 @@
     TeX documents.
 
     @begin[Generating formatted documentation]{section}
-    Only two functions in atdoc will be called by the casual user,
-    one for HTML output, and one for LaTeX output.  There is also an
+    Separate functions are offered for each output format:
+    HTML pages, LaTeX/PDF output, and .info files.  There is also an
     older function called generate-documentation, which in now an
     alias for generate-html-documentation.
 
     @aboutfun{generate-html-documentation}
     @aboutfun{generate-latex-documentation}
+    @aboutfun{generate-info-documentation}
     @aboutfun{generate-documentation}
     @end{section}
 

@@ -6,8 +6,8 @@
     extracts <a
     href="http://www.lispworks.com/documentation/HyperSpec/Body/f_docume.htm">documention
     strings</a>
-    written using a custom markup language and generates HTML pages or
-    TeX documents.
+    written using a custom markup language and generates HTML pages,
+    TeX documents, and Info files.
   </p>
   <p>
     atdoc was written
@@ -31,6 +31,11 @@
       <li>
 	TeX, for printable PDFs
 	(<a href="../example/tex/documentation.pdf">example</a>)
+      </li>
+      <li>
+	Info files
+	(<a href="info.png">screenshot</a>), generated
+	directly, without use of Texinfo
       </li>
     </ul>
   </p>
@@ -99,6 +104,11 @@
   <pre>(atdoc:generate-latex-documentation
    '(:blocks-world :blocks-world-goals)
    output-directory
+   :title "The Blocks World")</pre>
+  <pre>(atdoc:generate-info-documentation
+   '(:blocks-world :blocks-world-goals)
+   output-directory
+   :name "blocks-world"
    :title "The Blocks World")</pre>
 
   <h3>Writing a documentation string</h3>
