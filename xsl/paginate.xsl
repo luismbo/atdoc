@@ -38,31 +38,14 @@
   </xsl:template>
 
   <xsl:template match="page">
-    <xsl:choose>
-      <!-- first, try the correct approach and use the extension -->
-      <xsl:when test="element-available('xuriella:document')">
-	<xuriella:document
-	   href="{@pathname}"
-	   method="html"
-	   indent="yes"
-	   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
-	   doctype-system="http://www.w3.org/TR/html4/loose.dtd">
-	  <xsl:call-template name="page"/>
-	</xuriella:document>
-      </xsl:when>
-      <!-- if not available, fall back to what xsltproc wants.
-	   See above for the version hack to allow this.
-	-->
-      <xsl:otherwise>
-	<xsl:document href="{@pathname}"
-		      method="html"
-		      indent="yes"
-		      doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
-		      doctype-system="http://www.w3.org/TR/html4/loose.dtd">
-	  <xsl:call-template name="page"/>
-	</xsl:document>
-      </xsl:otherwise>
-    </xsl:choose>
+    <xuriella:document
+       href="{@pathname}"
+       method="html"
+       indent="yes"
+       doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
+       doctype-system="http://www.w3.org/TR/html4/loose.dtd">
+      <xsl:call-template name="page"/>
+    </xuriella:document>
   </xsl:template>
   
   <xsl:template name="page">

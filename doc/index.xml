@@ -298,6 +298,9 @@ Second paragraph.</pre>
       printable documentation.
     </li>
     <li>
+      Added a mode for .info output.
+    </li>
+    <li>
       Uses Xuriella XSLT instead of xsltproc.
     </li>
   </ul>

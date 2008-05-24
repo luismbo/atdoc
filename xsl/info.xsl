@@ -9,6 +9,8 @@
 		xmlns:atdoc="http://www.lichteblau.com/atdoc/"
 		extension-element-prefixes="atdoc"
 		version="1.0">
+  <xsl:include href="base-uri.xsl"/>
+
   <xsl:key name="aboutfun" match="aboutfun" use="string(.)"/>
   <xsl:key name="aboutclass" match="aboutclass" use="string(.)"/>
   <xsl:key name="aboutmacro" match="aboutmacro" use="string(.)"/>
@@ -17,8 +19,17 @@
 	   match="function-definition|class-definition|macro-definition|variable-definition"
 	   use="@id"/>
 
+  <xsl:key name="function-by-name"
+	   match="function-definition|macro-definition"
+	   use="@name"/>
+  <xsl:key name="class-by-name"
+	   match="class-definition|type-definition"
+	   use="@name"/>
+  <xsl:key name="variable-by-name" match="variable-definition" use="@name"/>
+
   <xsl:template match="/">
     <document filename="{/documentation/@name}.info">
+      <xsl:call-template name="copy-base-uri"/>
       <xsl:apply-templates select="documentation"/>
     </document>
   </xsl:template>    
@@ -109,16 +120,14 @@
       </xsl:for-each>
       <div/>
     </xsl:if>
-    <xsl:if
-       test="//class-definition[@id=current()//superclass/@id]
-	     //see-also
-	     /slot">
+    <xsl:variable name="inherited-slots"
+		  select="key('id', current()//superclass/@id)//see-also/slot"
+		  />
+    <xsl:if test="$inherited-slots">
       <p indent="5">
 	Inherited Slot Access Functions
       </p>
-      <xsl:for-each
-	   select="//class-definition[@id=current()//superclass/@id]
-		   //see-also/slot/see">
+      <xsl:for-each select="$inherited-slots">
 	<div indent="7">
 	  <xsl:apply-templates select="."/>
 	</div>	
@@ -330,16 +339,15 @@
   </xsl:template>
 
   <xsl:template match="aboutfun">
-    <xsl:apply-templates select="//function-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutmacro">
-    <xsl:apply-templates select="//macro-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutclass">
-    <xsl:apply-templates select="//class-definition[@name=current()]
-				 | //type-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('class-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="function-definition">

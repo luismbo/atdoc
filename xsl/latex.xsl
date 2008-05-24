@@ -16,6 +16,14 @@
 	   match="function-definition|class-definition|macro-definition|variable-definition"
 	   use="@id"/>
 
+  <xsl:key name="function-by-name"
+	   match="function-definition|macro-definition"
+	   use="@name"/>
+  <xsl:key name="class-by-name"
+	   match="class-definition|type-definition"
+	   use="@name"/>
+  <xsl:key name="variable-by-name" match="variable-definition" use="@name"/>
+
   <xsl:template match="/">
     <xsl:apply-templates select="documentation"/>
   </xsl:template>    
@@ -77,15 +85,13 @@
 	</macro:itemize>
       </macro:sc>
     </xsl:if>
-    <xsl:if
-       test="//class-definition[@id=current()//superclass/@id]
-	     //see-also
-	     /slot">
+    <xsl:variable name="inherited-slots"
+		  select="key('id', current()//superclass/@id)//see-also/slot"
+		  />
+    <xsl:if test="$inherited-slots">
       <macro:sc label="Inherited Slot Access Functions">
 	<macro:itemize>
-	  <xsl:apply-templates
-	     select="//class-definition[@id=current()//superclass/@id]
-		     //see-also/slot/see"/>
+	  <xsl:apply-templates select="$inherited-slots/see"/>
 	</macro:itemize>
       </macro:sc>
     </xsl:if>
@@ -312,19 +318,19 @@
 	\item
 	<xsl:choose>
 	  <xsl:when test="local-name() = 'aboutfun'">
-	    <xsl:for-each select="//function-definition[@name=current()]">
+	    <xsl:for-each select="key('function-by-name', current())">
 	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
 	    </xsl:for-each>
 	  </xsl:when>
 
 	  <xsl:when test="local-name() = 'aboutmacro'">
-	    <xsl:for-each select="//macro-definition[@name=current()]">
+	    <xsl:for-each select="key('function-by-name', current())">
 	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
 	    </xsl:for-each>
 	  </xsl:when>
 
 	  <xsl:when test="local-name() = 'aboutclass'">
-	    <xsl:for-each select="//class-definition[@name=current()]">
+	    <xsl:for-each select="key('class-by-name', current())">
 	      <macro:hyperref><macro:escaped select="@name"/></macro:hyperref>
 	    </xsl:for-each>
 	  </xsl:when>
@@ -342,16 +348,15 @@
   </xsl:template>
 
   <xsl:template match="aboutfun">
-    <xsl:apply-templates select="//function-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutmacro">
-    <xsl:apply-templates select="//macro-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutclass">
-    <xsl:apply-templates select="//class-definition[@name=current()]
-				 | //type-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('class-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="function-definition">

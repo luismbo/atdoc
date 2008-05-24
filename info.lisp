@@ -59,11 +59,11 @@
 			 :include-slot-definitions-p include-slot-definitions-p)
   (let* ((*default-pathname-defaults* (merge-pathnames directory))
 	 (pathname (merge-pathnames (concatenate 'string name ".info"))))
-    (apply-stylesheet "macros.xsl" "info.xsl" ".info.xsl")
-    (apply-stylesheet "macros.xsl" "info-paginate.xsl" ".info-paginate.xsl")
-    (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-    (apply-stylesheet ".info.xsl" ".atdoc.tmp1" ".atdoc.tmp2")
-    (apply-stylesheet ".info-paginate.xsl" ".atdoc.tmp2" pathname)
+    (apply-stylesheet-chain ".atdoc.xml"
+			    (list "cleanup.xsl"
+				  "info.xsl"
+				  "info-paginate.xsl")
+			    pathname)
     pathname))
 
 (xpath-sys:define-xpath-function/eager :atdoc :stars (x)

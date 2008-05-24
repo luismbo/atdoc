@@ -5,7 +5,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		xmlns:macro="http://lichteblau.com/macro"
 		version="1.0">
-  <xsl:import href="html-common.xsl"/>
+  <xsl:import href="html-common.tmp"/>
+
+  <xsl:include href="base-uri.xsl"/>
 
   <xsl:output method="xml" indent="yes"/>
 
@@ -13,8 +15,21 @@
   <xsl:key name="aboutclass" match="aboutclass" use="string(.)"/>
   <xsl:key name="aboutmacro" match="aboutmacro" use="string(.)"/>
 
+  <xsl:key name="id"
+	   match="class-definition|function-definition|macro-definition|variable-definition"
+	   use="@id"/>
+
+  <xsl:key name="function-by-name"
+	   match="function-definition|macro-definition"
+	   use="@name"/>
+  <xsl:key name="class-by-name"
+	   match="class-definition|type-definition"
+	   use="@name"/>
+  <xsl:key name="variable-by-name" match="variable-definition" use="@name"/>
+
   <xsl:template match="/">
     <pages>
+      <xsl:call-template name="copy-base-uri"/>
       <macro:copy-attribute name="logo" path="documentation"/>
       <macro:copy-attribute name="css" path="documentation"/>
       <macro:copy-attribute name="heading" path="documentation"/>
@@ -105,16 +120,14 @@
 	</ul>
       </div>
     </xsl:if>
-    <xsl:if
-       test="//class-definition[@id=current()//superclass/@id]
-	     //see-also
-	     /slot">
+    <xsl:variable name="inherited-slots"
+		  select="key('id', current()//superclass/@id)//see-also/slot"
+		  />
+    <xsl:if test="$inherited-slots">
       <div class="sph3">Inherited Slot Access Functions:</div>
       <div>
 	<ul>
-	  <xsl:apply-templates
-	     select="//class-definition[@id=current()//superclass/@id]
-		     //see-also/slot/see"/>
+	  <xsl:apply-templates select="$inherited-slots/see"/>
 	</ul>
       </div>
     </xsl:if>
@@ -374,16 +387,15 @@
   </xsl:template>
 
   <xsl:template match="aboutfun">
-    <xsl:apply-templates select="//function-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutmacro">
-    <xsl:apply-templates select="//macro-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('function-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="aboutclass">
-    <xsl:apply-templates select="//class-definition[@name=current()]
-				 | //type-definition[@name=current()]"/>
+    <xsl:apply-templates select="key('class-by-name', current())"/>
   </xsl:template>
 
   <xsl:template match="function-definition">

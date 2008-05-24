@@ -39,18 +39,6 @@
 	(setf file (merge-pathnames file base))))
     (namestring file)))
 
-(defparameter *apply-stylesheet*
-  ;; 'apply-stylesheet/xsltproc
-  'apply-stylesheet/xuriella)
-
-#+(or)
-(setf *apply-stylesheet* 'apply-stylesheet/xsltproc)
-
-(defun apply-stylesheet/xuriella (stylesheet input output)
-  (xuriella:apply-stylesheet (pathname (magic-namestring stylesheet))
-			     (pathname (magic-namestring input))
-			     :output (pathname (magic-namestring output))))
-
 #+sbcl
 (defun run-shell-command (directory output command &rest args)
   ;; fixme: escape the namestrings properly, or use a function calling
@@ -88,15 +76,75 @@
       (error "running ~A failed with code ~A [~%~A~%]"
 	     command exitcode stderr))))
 
-(defun apply-stylesheet/xsltproc (stylesheet input output)
-  (run-shell-command (magic-namestring *default-pathname-defaults*)
-		     (magic-namestring output)
-		     "xsltproc"
-		     (magic-namestring stylesheet)
-		     (magic-namestring input)))
+(defvar *stylesheets*)
 
-(defun apply-stylesheet (stylesheet input output)
-  (funcall *apply-stylesheet* stylesheet input output))
+(defun flush-cache ()
+  (setf *stylesheets* (make-hash-table :test 'equal)))
+
+(flush-cache)
+
+(defun grovel-stylesheet-dependencies (namestring)
+  (let ((dependencies '()))
+    (klacks:with-open-source (source (cxml:make-source (pathname namestring)))
+      (loop
+	 for event = (klacks:peek-next source)
+	 while event
+	 do
+	 (when (and (eq event :start-element)
+		    (equal (klacks:current-uri source)
+			   "http://www.w3.org/1999/XSL/Transform")
+		    (or (equal (klacks:current-lname source) "import")
+			(equal (klacks:current-lname source) "include")))
+	   (push (make-pathname
+		  :type "xsl"
+		  :defaults (merge-pathnames
+			     (klacks:get-attribute source "href")
+			     namestring))
+		 dependencies))))
+    dependencies))
+
+(defun find-stylesheet (namestring)
+  (let ((cache-entry (gethash namestring *stylesheets*)))
+    (unless (and cache-entry
+		 (every (lambda (dependency)
+			  (eql (file-write-date (car dependency))
+			       (cdr dependency)))
+			(cdr cache-entry)))
+      (if cache-entry
+	  (format t "~&Stylesheet has changed, reloading: ~A~%" namestring)
+	  (format t "~&Loading stylesheet: ~A~%" namestring))
+      (let ((dependencies (grovel-stylesheet-dependencies namestring)))
+	(dolist (dependency dependencies)
+	  (with-open-file (s (make-pathname :type "tmp" :defaults dependency)
+			     :direction :output
+			     :if-exists :rename-and-delete)
+	    (xuriella:apply-stylesheet
+	     (pathname (magic-namestring "macros.xsl"))
+	     dependency
+	     :output s)))
+	(setf cache-entry
+	      (cons (xuriella:parse-stylesheet
+		     (xuriella:apply-stylesheet
+		      (pathname (magic-namestring "macros.xsl"))
+		      (pathname namestring)))
+		    (mapcar (lambda (file)
+			      (cons file (file-write-date file)))
+			    (list* namestring
+				   (magic-namestring "macros.xsl")
+				   dependencies))))
+	(setf (gethash namestring *stylesheets*)
+	      cache-entry)))
+    (car cache-entry)))
+
+(defun apply-stylesheet-chain (input stylesheets output)
+  (loop
+     for input-designator = (pathname (magic-namestring input)) then result
+     for (current-stylesheet . rest) on stylesheets
+     for output-designator = (if rest nil (pathname (magic-namestring output)))
+     for result = (xuriella:apply-stylesheet
+		   (find-stylesheet (magic-namestring current-stylesheet))
+		   input-designator
+		   :output output-designator)))
 
 (defun copy-file (a b &key (if-exists :error))
   (with-open-file (in a :element-type '(unsigned-byte 8))
@@ -212,16 +260,13 @@
 	       :if-exists :rename-and-delete)
     (copy-file (magic-namestring "header.gif") "header.gif"
 	       :if-exists :rename-and-delete)
-    (apply-stylesheet "macros.xsl" "html-common.xsl" ".html-common.xsl")
-    (rename-file ".html-common.xsl" "html-common.xsl")
-    (apply-stylesheet "macros.xsl"
-		      (if single-page-p
-			  "html-singlepage.xsl"
-			  "html.xsl")
-		      ".atdoc.html.xsl.out")
-    (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-    (apply-stylesheet ".atdoc.html.xsl.out" ".atdoc.tmp1" ".atdoc.tmp2")
-    (apply-stylesheet "paginate.xsl" ".atdoc.tmp2" (merge-pathnames "index.html"))))
+    (apply-stylesheet-chain ".atdoc.xml"
+			    (list "cleanup.xsl"
+				  (if single-page-p
+				      "html-singlepage.xsl"
+				      "html.xsl")
+				  "paginate.xsl")
+			    (merge-pathnames "index.html"))))
 
 (defun generate-latex-documentation
     (packages directory
@@ -252,11 +297,12 @@
 			 :include-slot-definitions-p include-slot-definitions-p)
   (format t "Generating .tex...~%")
   (let ((*default-pathname-defaults* (merge-pathnames directory)))
-    (apply-stylesheet "macros.xsl" "latex.xsl" ".latex.xsl")
-    (apply-stylesheet "cleanup.xsl" ".atdoc.xml" ".atdoc.tmp1")
-    (apply-stylesheet ".latex.xsl" ".atdoc.tmp1" (merge-pathnames "documentation.tex"))
     (copy-file (magic-namestring "defun.tex") (merge-pathnames "defun.tex")
 	       :if-exists :rename-and-delete)
+    (apply-stylesheet-chain ".atdoc.xml"
+			    (list "cleanup.xsl"
+				  "latex.xsl")
+			    (merge-pathnames "documentation.tex"))
     (let ((i 0))
       (labels ((latex1 ()
 		 (format t "Running pdflatex (~D)...~%" (incf i))
@@ -290,6 +336,9 @@
   (setf x (cl-ppcre:regex-replace-all "&"
 				      (xpath:string-value x)
 				      "$\\\\&$")))
+
+(xpath-sys:define-xpath-function/eager :atdoc :base-uri (x)
+  (xpath-protocol:base-uri (xpath:first-node x)))
 
 (xuriella:define-extension-group :atdoc "http://www.lichteblau.com/atdoc/")
 

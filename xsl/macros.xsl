@@ -7,12 +7,21 @@
 		xmlns:extra="http://lichteblau.com/extra"
 		xmlns:atdoc="http://www.lichteblau.com/atdoc/"
 		version="1.0">
+  <xsl:include href="base-uri.xsl"/>
+
   <xsl:output method="xml" indent="no"/>
 
   <xsl:namespace-alias stylesheet-prefix="extra" result-prefix="xsl"/>
 
   <xsl:template match="@*|node()">
     <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="/*">
+    <xsl:copy>
+      <xsl:call-template name="copy-base-uri"/>
       <xsl:apply-templates select="@*|node()"/>
     </xsl:copy>
   </xsl:template>
