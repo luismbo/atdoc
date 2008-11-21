@@ -143,6 +143,14 @@
       </xsl:otherwise>
     </xsl:choose>
     <xsl:apply-templates select="implementation-note"/>
+    <xsl:if test="see-also/condition">
+      <div class="sph3">Condition Types Signalled:</div>
+      <div>
+ 	<ul>
+	  <xsl:apply-templates select="see-also/condition/see"/>
+	</ul>
+      </div>
+    </xsl:if>
     <xsl:if test="see-also/other|see-also/auto">
       <div class="sph3">See also:</div>
       <div>

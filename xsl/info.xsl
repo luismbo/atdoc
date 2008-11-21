@@ -109,6 +109,12 @@
 	<xsl:apply-templates select="see-also/constructor/see"/>
       </p>
     </xsl:if>
+    <xsl:if test="see-also/condition">
+      <p indent="5">
+	Condition Types Signalled:
+	<xsl:apply-templates select="see-also/condition/see"/>
+      </p>
+    </xsl:if>
     <xsl:if test="see-also/slot">
       <p indent="5">
 	Slot Access Functions

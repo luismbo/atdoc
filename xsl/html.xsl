@@ -361,6 +361,14 @@
 	</simple-table>
       </div>
     </xsl:if>
+    <xsl:if test="see-also/condition">
+      <h3>Condition Types Signalled</h3>
+      <div class="indent">
+	<simple-table>
+	  <xsl:apply-templates select="see-also/condition/see"/>
+	</simple-table>
+      </div>
+    </xsl:if>
     <xsl:if test="see-also/slot">
       <h3>Slot Access Functions</h3>
       <div class="indent">

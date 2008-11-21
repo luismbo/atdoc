@@ -78,6 +78,13 @@
 	</macro:itemize>
       </macro:sc>
     </xsl:if>
+    <xsl:if test="see-also/condition">
+      <macro:sc label="Condition Types Signalled">
+ 	<macro:itemize>
+	  <xsl:apply-templates select="see-also/condition/see"/>
+	</macro:itemize>
+      </macro:sc>
+    </xsl:if>
     <xsl:if test="see-also/slot">
       <macro:sc label="Slot Access Functions">
 	<macro:itemize>

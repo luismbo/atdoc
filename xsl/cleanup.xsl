@@ -56,6 +56,7 @@
   <xsl:template match="see"/>
   <xsl:template match="see-slot"/>
   <xsl:template match="see-constructor"/>
+  <xsl:template match="see-condition"/>
   <xsl:template match="arg"/>
   <xsl:template match="return"/>
   <xsl:template match="implementation-note"/>
@@ -75,6 +76,13 @@
   </xsl:template>
 
   <xsl:template mode="extract" match="see-constructor">
+    <see>
+      <xsl:apply-templates select="@*"/>
+      <xsl:apply-templates/>
+    </see>
+  </xsl:template>
+
+  <xsl:template mode="extract" match="see-condition">
     <see>
       <xsl:apply-templates select="@*"/>
       <xsl:apply-templates/>
@@ -115,7 +123,8 @@
     </xsl:if>
 
     <xsl:if test=".//see or .//see-slot or .//see-constructor
-		  or .//class or .//fun or .//variable or .//slot">
+		  or .//class or .//fun or .//variable or .//slot
+		  or .//see-condition">
       <see-also>
 	<xsl:if test=".//class or .//fun or .//variable">
 	  <auto>
@@ -140,6 +149,11 @@
 	  <constructor>
 	    <xsl:apply-templates mode="extract" select=".//see-constructor"/>
 	  </constructor>
+	</xsl:if>
+	<xsl:if test=".//see-condition">
+	  <condition>
+	    <xsl:apply-templates mode="extract" select=".//see-condition"/>
+	  </condition>
 	</xsl:if>
       </see-also>
     </xsl:if>
