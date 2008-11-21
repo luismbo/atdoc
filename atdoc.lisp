@@ -632,17 +632,23 @@
 (defmethod sax:end-element ((handler docstring-parser) uri lname qname)
   (declare (ignore lname uri))
   (let ((name (current-name handler)))
-    (when (equal qname name)
-      (let* ((next (cxml:proxy-chained-handler handler))
-	     (attrs (current-attributes handler))
-	     (text (current-text handler))
-	     (munged-name
-	      (munge-name
-	       (let ((*package* (docstring-package handler)))
-		 (read-from-string text))
-	       (current-kind handler))))
-	(push (sax:make-attribute :qname "id" :value munged-name) attrs)
-	(sax:start-element next nil name name attrs)
-	(sax:characters next text)
-	(setf (current-name handler) nil))))
+    (block give-up
+      (when (equal qname name)
+	(let* ((next (cxml:proxy-chained-handler handler))
+	       (attrs (current-attributes handler))
+	       (text (current-text handler))
+	       (munged-name
+		(handler-case
+		    (munge-name
+		     (let ((*package* (docstring-package handler)))
+		       (read-from-string text))
+		     (current-kind handler))
+		  (error (c)
+		    (warn "ignoring ~A" c)
+		    nil))))
+	  (when munged-name
+	    (push (sax:make-attribute :qname "id" :value munged-name) attrs))
+	  (sax:start-element next nil name name attrs)
+	  (sax:characters next text)
+	  (setf (current-name handler) nil)))))
   (call-next-method))
