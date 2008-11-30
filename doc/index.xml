@@ -28,20 +28,22 @@
 	HTML, all on one page
 	(<a href="../example/single-page/index.html">example</a>)
       </li>
+<!--
       <li>
 	TeX, for printable PDFs
 	(<a href="../example/tex/documentation.pdf">example</a>)
       </li>
       <li>
-	Info files
-	(<a href="info.png">screenshot</a>), generated
-	directly, without use of Texinfo
+	Info files, generated directly, without use of Texinfo
       </li>
+-->
     </ul>
   </p>
+<!--
   <p>
     (For PDF generation, an installation of LaTeX is required.)
   </p>
+-->
 
   <h3>Download and Installation</h3>
 
@@ -287,7 +289,7 @@ Second paragraph.</pre>
   </p>
 
   <h3>Recent changes</h3>
-  <p><b>2008-03-dd</b></p>
+  <p><b>2008-11-30</b></p>
   <ul>
     <li>
       Added a mode for single-page HTML output, combining several

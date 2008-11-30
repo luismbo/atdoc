@@ -31,6 +31,7 @@
 ;; LaTeX/PDF
 ;;
 
+#+(or)
 (let* ((base (asdf:component-pathname (asdf:find-system :blocks-world)))
        (output-directory (merge-pathnames "tex/" base)))
   (ensure-directories-exist output-directory)
@@ -43,6 +44,7 @@
 ;; Info
 ;;
 
+#+(or)
 (let* ((base (asdf:component-pathname (asdf:find-system :blocks-world)))
        (output-directory (merge-pathnames "info/" base)))
   (ensure-directories-exist output-directory)
