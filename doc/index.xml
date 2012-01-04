@@ -4,7 +4,7 @@
     for <a href="http://en.wikipedia.org/wiki/Common_Lisp">Common
       Lisp</a> packages.  It
     extracts <a
-    href="http://www.lispworks.com/documentation/HyperSpec/Body/f_docume.htm">documention
+    href="http://www.lispworks.com/documentation/HyperSpec/Body/f_docume.htm">documentation
     strings</a>
     written using a custom markup language and generates HTML pages,
     TeX documents, and Info files.
