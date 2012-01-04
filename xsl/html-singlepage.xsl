@@ -41,7 +41,7 @@
     <main-page title="{@index-title}">
       <div id="sp-about-packages">
 	<xsl:for-each select="package">
-	  <p>
+	  <p id="about-package-legend">
 	    <i>About <xsl:value-of select="@name"/>:</i>
 	    <xsl:apply-templates select="documentation-string"/>
 	  </p>
@@ -49,25 +49,27 @@
       </div>
 
       <xsl:if test="package/sections">
-	<h3>Contents</h3>
-	<div class="indent">
-	  <ul>
-	    <xsl:for-each select="package">
-	      <li>
-		Package <xsl:value-of select="@name"/>
-		<ul>
-		  <xsl:for-each select="sections/section">
-		    <li>
-		      <a href="#{generate-id()}">
-			<xsl:value-of select="@section"/>
-		      </a>
-		    </li>
-		  </xsl:for-each>
-		</ul>
-	      </li>
-	    </xsl:for-each>
-	  </ul>
-	</div>
+        <div id="contents">
+          <h3>Contents</h3>
+          <div class="indent">
+            <ul>
+              <xsl:for-each select="package">
+                <li>
+                  Package <xsl:value-of select="@name"/>
+                  <ul>
+                    <xsl:for-each select="sections/section">
+                      <li>
+                        <a href="#{generate-id()}">
+                          <xsl:value-of select="@section"/>
+                        </a>
+                      </li>
+                    </xsl:for-each>
+                  </ul>
+                </li>
+              </xsl:for-each>
+            </ul>
+          </div>
+        </div>
       </xsl:if>
 
       <xsl:apply-templates select="package"/>
@@ -133,7 +135,7 @@
     </xsl:if>
     <xsl:choose>
       <xsl:when test="documentation-string">
-	<div class="sph3">Details:</div>
+	<div class="sph3 function-details-legend">Details:</div>
 	<xsl:apply-templates select="documentation-string"/>
       </xsl:when>
       <xsl:otherwise>

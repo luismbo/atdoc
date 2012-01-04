@@ -138,7 +138,7 @@
 	    </b>
 	  </td>
 	  <td valign="center" align="right">
-            <b>API documentation</b>
+            <b id="heading2">API documentation</b>
 	  </td>
 	</tr>
       </table>
