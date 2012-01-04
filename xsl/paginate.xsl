@@ -132,10 +132,10 @@
 		&#160;&#160;
 	      </xsl:otherwise>
 	    </xsl:choose>
-	    <b>
+	    <h1>
 	      <xsl:text> </xsl:text>
 	      <xsl:value-of select="/pages/@heading"/>
-	    </b>
+	    </h1>
 	  </td>
 	  <td valign="center" align="right">
             <b id="heading2">API documentation</b>
