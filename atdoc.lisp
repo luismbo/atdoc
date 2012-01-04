@@ -160,6 +160,10 @@
 
 (defvar *include-slot-definitions-p* nil)
 
+(defun find-package-or-lose (package-designator)
+  (or (find-package package-designator)
+      (error "could not find package named ~S." package-designator)))
+
 (defun extract-documentation (packages directory
 			      &rest keys
 			      &key include-slot-definitions-p
@@ -178,7 +182,7 @@
    a list of direct slots.
 
    Extra parameters will be inserted as attributes on the root element."
-  (setf packages (mapcar #'find-package packages))
+  (setf packages (mapcar #'find-package-or-lose packages))
   (let ((*include-slot-definitions-p* include-slot-definitions-p))
     (with-open-file (s (merge-pathnames ".atdoc.xml" directory)
 		       :element-type '(unsigned-byte 8)
